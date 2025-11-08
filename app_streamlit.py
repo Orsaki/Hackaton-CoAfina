@@ -669,4 +669,5 @@ elif menu == "Equipo":
         st.markdown("#### Brisa Paredes")
     with col2:
         st.markdown("#### Pamela Lazaro")
-        st.markdown("#### Fatima Montes")
+        st.markdown("#### Fátima Montes Yato")
+
