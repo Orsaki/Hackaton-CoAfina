@@ -5,7 +5,7 @@ import altair as alt
 import plotly.express as px
 import numpy as np
 import pydeck as pdk
-import json # Para manejar la carga de datos estadísticos
+import json
 
 # -----------------------------
 # CONFIGURACIÓN DE LA PÁGINA
@@ -54,7 +54,7 @@ def load_data(file_path):
         for col in NUMERIC_COLS:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
-        
+
         if 'latitud' not in df.columns or 'longitud' not in df.columns:
             st.error("Error: Faltan columnas 'latitud' o 'longitud' en los datos.")
             return None
@@ -395,19 +395,19 @@ elif menu == "Mapa de Estaciones":
         # 1. Obtener ubicaciones únicas y crear el ID numérico
         locations = df.drop_duplicates(subset=['estacion'])[
             ['estacion', 'latitud', 'longitud']].reset_index(drop=True)
-        
+
         # Crear la columna ID numérica (empezando en 1)
         locations['ID'] = (locations.index + 1).astype(str)
-        
+
         # Renombrar para Plotly
         locations = locations.rename(
             columns={"latitud": "lat", "longitud": "lon"})
 
         if not locations.empty:
-            
+
             # --- Configuración de columnas para el Layout (Mapa vs. Índice) ---
             col_map, col_index = st.columns([5, 2])
-            
+
             with col_map:
                 st.subheader("Mapa de Estaciones")
 
@@ -418,13 +418,14 @@ elif menu == "Mapa de Estaciones":
                     lon="lon",
                     hover_name="estacion",
                     hover_data={"ID": True, "lat": False, "lon": False},
-                    color="ID", # Color por ID (para distinguir visualmente)
+                    color="ID",  # Color por ID (para distinguir visualmente)
                     color_discrete_sequence=px.colors.qualitative.Bold,
                     zoom=7.5,
                     height=600,
-                    mapbox_style="carto-dark" # Estilo oscuro de Plotly (estable)
+                    # Estilo oscuro de Plotly (estable)
+                    mapbox_style="carto-dark"
                 )
-                
+
                 # Añadir los números (etiquetas) al mapa de Plotly
                 fig_map.update_traces(
                     marker=dict(size=12, opacity=0.8, symbol='circle',
@@ -432,23 +433,24 @@ elif menu == "Mapa de Estaciones":
                     text=locations['ID'],
                     textposition='middle right',
                     mode='markers+text',
-                    textfont=dict(color='white', size=12) # Color blanco para el estilo oscuro
+                    # Color blanco para el estilo oscuro
+                    textfont=dict(color='white', size=12)
                 )
-                
+
                 # Centrar el mapa en la región de Colombia
                 fig_map.update_layout(
-                    margin={"r":0,"t":0,"l":0,"b":0},
-                    mapbox_center={"lat": locations['lat'].mean(), "lon": locations['lon'].mean()},
+                    margin={"r": 0, "t": 0, "l": 0, "b": 0},
+                    mapbox_center={"lat": locations['lat'].mean(
+                    ), "lon": locations['lon'].mean()},
                     mapbox_zoom=7.5
                 )
 
                 st.plotly_chart(fig_map, use_container_width=True)
 
-
             with col_index:
                 st.subheader("Índice de Estaciones")
                 st.info("El ID corresponde al punto en el mapa.")
-                
+
                 # Crear y mostrar el índice (Leyenda)
                 st.dataframe(
                     locations[['ID', 'estacion']].rename(
@@ -456,11 +458,12 @@ elif menu == "Mapa de Estaciones":
                     ),
                     hide_index=True,
                     use_container_width=True,
-                    height=600 # Fijamos la altura para que coincida con el mapa
+                    height=600  # Fijamos la altura para que coincida con el mapa
                 )
-                
+
         else:
-            st.warning("No se encontraron datos de ubicación (lat, lon) después de la carga.")
+            st.warning(
+                "No se encontraron datos de ubicación (lat, lon) después de la carga.")
     else:
         st.warning("No se pudieron cargar los datos para el mapa.")
 
@@ -514,7 +517,7 @@ elif menu == "Animación de Datos":
             color_continuous_scale=px.colors.sequential.YlOrRd,
             size_max=30,
             zoom=8,
-            mapbox_style="carto-dark", # Estilo oscuro de Plotly
+            mapbox_style="carto-dark",  # Estilo oscuro de Plotly
             center={"lat": df_anim_grouped['latitud'].mean(
             ), "lon": df_anim_grouped['longitud'].mean()},
             title=f"Animación de '{variable_anim_choice}' a lo largo del tiempo"
@@ -548,7 +551,8 @@ elif menu == "Análisis por Estación":
                 "Velocidad Viento (km/h)": "viento_velocidad",
                 "Dirección Viento (Rosa)": "viento_direccion",
                 "Presión Barométrica (hPa)": "presion",
-                "Índice de Calidad del Aire (ICA)": "ica" # <-- ¡NUEVO GRÁFICO!
+                # <-- ¡NUEVO GRÁFICO!
+                "Índice de Calidad del Aire (ICA)": "ica"
             }
             variable_choice_label = st.selectbox(
                 label="Selecciona la Variable:",
@@ -582,34 +586,42 @@ elif menu == "Análisis por Estación":
             (df['estacion'] == selected_station) &
             (df['month'] == selected_month_num)
         ]
-        
+
         df_filtered_valid = get_valid_data(df_filtered, data_col)
-        
+
         if df_filtered_valid.empty:
-            st.warning(f"No hay datos de {variable_choice_label} para '{selected_station}' en {month_map.get(selected_month_num, '')}.")
-        
+            st.warning(
+                f"No hay datos de {variable_choice_label} para '{selected_station}' en {month_map.get(selected_month_num, '')}.")
+
         else:
-            
+
             # ==========================================================
             # GRÁFICO 1: PM2.5 (Adaptado a 'pm2_5')
             # ==========================================================
             if data_col == "pm2_5":
-                
+
                 stat_col1, stat_col2, stat_col3 = st.columns(3)
-                stat_col1.metric("📈 Máximo (µg/m³)", f"{df_filtered_valid[data_col].max():.2f}")
-                stat_col2.metric("📉 Mínimo (µg/m³)", f"{df_filtered_valid[data_col].min():.2f}")
-                stat_col3.metric("📊 Medio (µg/m³)", f"{df_filtered_valid[data_col].mean():.2f}")
+                stat_col1.metric("📈 Máximo (µg/m³)",
+                                 f"{df_filtered_valid[data_col].max():.2f}")
+                stat_col2.metric("📉 Mínimo (µg/m³)",
+                                 f"{df_filtered_valid[data_col].min():.2f}")
+                stat_col3.metric("📊 Medio (µg/m³)",
+                                 f"{df_filtered_valid[data_col].mean():.2f}")
                 st.markdown("---")
 
                 line_chart = alt.Chart(df_filtered_valid).mark_line(point=True, opacity=0.8).encode(
-                    x=alt.X('timestamp:T', title='Fecha y Hora', axis=alt.Axis(tickCount=10)),
-                    y=alt.Y(f'{data_col}:Q', title='PM2.5 (µg/m³)', scale=alt.Scale(zero=False)),
+                    x=alt.X('timestamp:T', title='Fecha y Hora',
+                            axis=alt.Axis(tickCount=10)),
+                    y=alt.Y(f'{data_col}:Q', title='PM2.5 (µg/m³)',
+                            scale=alt.Scale(zero=False)),
                     tooltip=['timestamp:T', f'{data_col}:Q', 'estacion']
                 )
                 rule_df = pd.DataFrame({'limite_perjudicial': [56]})
-                rule = alt.Chart(rule_df).mark_rule(color='red', strokeWidth=2, strokeDash=[5, 5]).encode(y='limite_perjudicial:Q')
-                text = alt.Chart(rule_df).mark_text(align='left', baseline='bottom', dx=5, dy=-5, color='red', fontSize=12).encode(y='limite_perjudicial:Q', text=alt.value('Límite Perjudicial (56 µg/m³)'))
-                
+                rule = alt.Chart(rule_df).mark_rule(color='red', strokeWidth=2, strokeDash=[
+                    5, 5]).encode(y='limite_perjudicial:Q')
+                text = alt.Chart(rule_df).mark_text(align='left', baseline='bottom', dx=5, dy=-5, color='red',
+                                                    fontSize=12).encode(y='limite_perjudicial:Q', text=alt.value('Límite Perjudicial (56 µg/m³)'))
+
                 final_chart_pm25 = alt.layer(line_chart, rule, text).properties(
                     title=f'PM2.5 para: {selected_station} ({month_map.get(selected_month_num, "")})'
                 ).interactive()
@@ -619,38 +631,47 @@ elif menu == "Análisis por Estación":
             # GRÁFICO 2: TEMPERATURA (Adaptado a 'temperatura')
             # ==========================================================
             elif data_col == "temperatura":
-                
+
                 stat_col1, stat_col2, stat_col3 = st.columns(3)
-                stat_col1.metric("📈 Máxima (°C)", f"{df_filtered_valid[data_col].max():.2f}")
-                stat_col2.metric("📉 Mínima (°C)", f"{df_filtered_valid[data_col].min():.2f}")
-                stat_col3.metric("📊 Media (°C)", f"{df_filtered_valid[data_col].mean():.2f}")
+                stat_col1.metric(
+                    "📈 Máxima (°C)", f"{df_filtered_valid[data_col].max():.2f}")
+                stat_col2.metric(
+                    "📉 Mínima (°C)", f"{df_filtered_valid[data_col].min():.2f}")
+                stat_col3.metric(
+                    "📊 Media (°C)", f"{df_filtered_valid[data_col].mean():.2f}")
                 st.markdown("---")
 
-                colorscale = [[0.0, "rgb(0, 68, 204)"], [0.33, "rgb(102, 204, 255)"], [0.66, "rgb(255, 255, 102)"], [1.0, "rgb(255, 51, 51)"]]
+                colorscale = [[0.0, "rgb(0, 68, 204)"], [0.33, "rgb(102, 204, 255)"], [
+                    0.66, "rgb(255, 255, 102)"], [1.0, "rgb(255, 51, 51)"]]
                 fig_temp = px.scatter(
                     df_filtered_valid, x="timestamp", y=data_col, color=data_col,
-                    color_continuous_scale=colorscale, labels={data_col: "Temperatura (°C)", "timestamp": "Tiempo"},
+                    color_continuous_scale=colorscale, labels={
+                        data_col: "Temperatura (°C)", "timestamp": "Tiempo"},
                 )
                 fig_temp.add_scatter(x=df_filtered_valid["timestamp"], y=df_filtered_valid[data_col], mode="lines", line=dict(
                     color="rgba(100,100,100,0.3)", width=2), name="Tendencia")
                 fig_temp.update_layout(
-                    title=dict(text=f"Temperatura - {selected_station} ({month_map.get(selected_month_num, "")})", x=0.5),
+                    title=dict(
+                        text=f"Temperatura - {selected_station} ({month_map.get(selected_month_num, "")})", x=0.5),
                     xaxis_title="Tiempo", yaxis_title="Temperatura (°C)", coloraxis_colorbar=dict(title="°C"),
                     plot_bgcolor="rgba(245,245,245,1)", paper_bgcolor="rgba(245,245,245,1)",
                 )
-                fig_temp.update_traces(hovertemplate="Fecha: %{x}<br>Temperatura: %{y:.2f} °C<extra></extra>")
+                fig_temp.update_traces(
+                    hovertemplate="Fecha: %{x}<br>Temperatura: %{y:.2f} °C<extra></extra>")
                 st.plotly_chart(fig_temp, use_container_width=True)
-
 
             # ==========================================================
             # GRÁFICO 3: PRECIPITACIÓN (Adaptado a 'precipitacion')
             # ==========================================================
             elif data_col == "precipitacion":
-                
+
                 stat_col1, stat_col2, stat_col3 = st.columns(3)
-                stat_col1.metric("🌧️ Máxima (en 15min)", f"{df_filtered_valid[data_col].max():.2f} mm")
-                stat_col2.metric("💧 Total Acumulada", f"{df_filtered_valid[data_col].sum():.2f} mm")
-                stat_col3.metric("📊 Media (por registro)", f"{df_filtered_valid[data_col].mean():.2f} mm")
+                stat_col1.metric("🌧️ Máxima (en 15min)",
+                                 f"{df_filtered_valid[data_col].max():.2f} mm")
+                stat_col2.metric("💧 Total Acumulada",
+                                 f"{df_filtered_valid[data_col].sum():.2f} mm")
+                stat_col3.metric("📊 Media (por registro)",
+                                 f"{df_filtered_valid[data_col].mean():.2f} mm")
                 st.markdown("---")
 
                 fig_precip = px.area(
@@ -658,7 +679,8 @@ elif menu == "Análisis por Estación":
                     title=f"Precipitación - {selected_station} ({month_map.get(selected_month_num, "")})",
                     color_discrete_sequence=["#0077cc"],
                 )
-                fig_precip.update_traces(line_color="#0055aa", fillcolor="rgba(0,119,204,0.3)")
+                fig_precip.update_traces(
+                    line_color="#0055aa", fillcolor="rgba(0,119,204,0.3)")
                 fig_precip.update_layout(
                     template="plotly_white", xaxis_title="Fecha", yaxis_title="Precipitación (mm)",
                     title_x=0.5, hovermode="x unified",
@@ -669,15 +691,19 @@ elif menu == "Análisis por Estación":
             # GRÁFICO 4: HEATMAP DE HUMEDAD (Adaptado a 'humedad')
             # ==========================================================
             elif data_col == "humedad":
-                
+
                 stat_col1, stat_col2, stat_col3 = st.columns(3)
-                stat_col1.metric("📈 Humedad Máxima (%)", f"{df_filtered_valid[data_col].max():.2f}")
-                stat_col2.metric("📉 Humedad Mínima (%)", f"{df_filtered_valid[data_col].min():.2f}")
-                stat_col3.metric("📊 Humedad Media (%)", f"{df_filtered_valid[data_col].mean():.2f}")
+                stat_col1.metric("📈 Humedad Máxima (%)",
+                                 f"{df_filtered_valid[data_col].max():.2f}")
+                stat_col2.metric("📉 Humedad Mínima (%)",
+                                 f"{df_filtered_valid[data_col].min():.2f}")
+                stat_col3.metric("📊 Humedad Media (%)",
+                                 f"{df_filtered_valid[data_col].mean():.2f}")
                 st.markdown("---")
 
                 heatmap = alt.Chart(df_filtered_valid).mark_rect().encode(
-                    x=alt.X('date(timestamp):O', title=f"Día de {month_map.get(selected_month_num, '')}"),
+                    x=alt.X(
+                        'date(timestamp):O', title=f"Día de {month_map.get(selected_month_num, '')}"),
                     y=alt.Y('hours(timestamp):O', title='Hora del Día'),
                     color=alt.Color(f'mean({data_col}):Q', title='Humedad Promedio (%)', scale=alt.Scale(
                         scheme='tealblues')),
@@ -691,11 +717,14 @@ elif menu == "Análisis por Estación":
             # GRÁFICO 5: VELOCIDAD VIENTO (Adaptado a 'viento_velocidad')
             # ==========================================================
             elif data_col == "viento_velocidad":
-                
+
                 stat_col1, stat_col2, stat_col3 = st.columns(3)
-                stat_col1.metric("💨 Máxima (km/h)", f"{df_filtered_valid[data_col].max():.2f}")
-                stat_col2.metric("🍃 Mínima (km/h)", f"{df_filtered_valid[data_col].min():.2f}")
-                stat_col3.metric("📊 Media (km/h)", f"{df_filtered_valid[data_col].mean():.2f}")
+                stat_col1.metric("💨 Máxima (km/h)",
+                                 f"{df_filtered_valid[data_col].max():.2f}")
+                stat_col2.metric("🍃 Mínima (km/h)",
+                                 f"{df_filtered_valid[data_col].min():.2f}")
+                stat_col3.metric("📊 Media (km/h)",
+                                 f"{df_filtered_valid[data_col].mean():.2f}")
                 st.markdown("---")
 
                 fig_wind_speed = px.line(
@@ -713,11 +742,14 @@ elif menu == "Análisis por Estación":
             # GRÁFICO 6: PRESIÓN (Adaptado a 'presion')
             # ==========================================================
             elif data_col == "presion":
-                
+
                 stat_col1, stat_col2, stat_col3 = st.columns(3)
-                stat_col1.metric("📈 Máxima (hPa)", f"{df_filtered_valid[data_col].max():.2f}")
-                stat_col2.metric("📉 Mínima (hPa)", f"{df_filtered_valid[data_col].min():.2f}")
-                stat_col3.metric("📊 Media (hPa)", f"{df_filtered_valid[data_col].mean():.2f}")
+                stat_col1.metric("📈 Máxima (hPa)",
+                                 f"{df_filtered_valid[data_col].max():.2f}")
+                stat_col2.metric("📉 Mínima (hPa)",
+                                 f"{df_filtered_valid[data_col].min():.2f}")
+                stat_col3.metric(
+                    "📊 Media (hPa)", f"{df_filtered_valid[data_col].mean():.2f}")
                 st.markdown("---")
 
                 fig_pressure = px.line(
@@ -735,12 +767,14 @@ elif menu == "Análisis por Estación":
             # GRÁFICO 7: ROSA DE VIENTOS (Adaptado)
             # ==========================================================
             elif data_col == "viento_direccion":
-                
+
                 # Para la Rosa de Vientos, necesitamos ambas columnas limpias
-                dff_wind = df_filtered_valid.dropna(subset=['viento_direccion', 'viento_velocidad'])
-                
+                dff_wind = df_filtered_valid.dropna(
+                    subset=['viento_direccion', 'viento_velocidad'])
+
                 if not dff_wind.empty:
-                    st.info("La Rosa de Vientos muestra la frecuencia de la dirección (de dónde viene el viento) y su intensidad.")
+                    st.info(
+                        "La Rosa de Vientos muestra la frecuencia de la dirección (de dónde viene el viento) y su intensidad.")
 
                     bins = [-0.1, 22.5, 67.5, 112.5, 157.5,
                             202.5, 247.5, 292.5, 337.5, 360]
@@ -765,53 +799,64 @@ elif menu == "Análisis por Estación":
                             template="plotly_white",
                             title=f"Rosa de Vientos - {selected_station} ({month_map.get(selected_month_num, "")})",
                             color_discrete_sequence=px.colors.sequential.YlOrRd,
-                            category_orders={"Dirección": ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']}
+                            category_orders={"Dirección": [
+                                'N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']}
                         )
-                        st.plotly_chart(fig_wind_rose, use_container_width=True)
+                        st.plotly_chart(
+                            fig_wind_rose, use_container_width=True)
                     except Exception as e:
                         st.error(f"Error al generar la Rosa de Vientos: {e}.")
                 else:
                     st.warning(
                         f"No hay datos suficientes de Viento para '{selected_station}' en {month_map.get(selected_month_num, '')}.")
-            
+
             # ==========================================================
             # GRÁFICO 8: ÍNDICE DE CALIDAD DEL AIRE (ICA) (¡NUEVO!)
             # ==========================================================
             elif data_col == "ica":
-                
+
                 # --- Métricas con iconos ---
                 stat_col1, stat_col2, stat_col3 = st.columns(3)
-                stat_col1.metric("📈 ICA Máximo", f"{df_filtered_valid[data_col].max():.2f}")
-                stat_col2.metric("📉 ICA Mínimo", f"{df_filtered_valid[data_col].min():.2f}")
-                stat_col3.metric("📊 ICA Medio", f"{df_filtered_valid[data_col].mean():.2f}")
+                stat_col1.metric(
+                    "📈 ICA Máximo", f"{df_filtered_valid[data_col].max():.2f}")
+                stat_col2.metric(
+                    "📉 ICA Mínimo", f"{df_filtered_valid[data_col].min():.2f}")
+                stat_col3.metric(
+                    "📊 ICA Medio", f"{df_filtered_valid[data_col].mean():.2f}")
                 st.markdown("---")
 
                 # Agrupamos por día para que el gráfico sea legible
-                df_ica_daily = df_filtered_valid.set_index('timestamp').resample('D')[data_col].mean().reset_index()
+                df_ica_daily = df_filtered_valid.set_index('timestamp').resample('D')[
+                    data_col].mean().reset_index()
 
                 fig_ica = px.line(
                     df_ica_daily,
                     x='timestamp',
                     y=data_col,
                     title=f'ICA Promedio Diario - {selected_station} ({month_map.get(selected_month_num, "")})',
-                    labels={'ica':'ICA Promedio','timestamp':'Fecha'},
+                    labels={'ica': 'ICA Promedio', 'timestamp': 'Fecha'},
                     template='plotly_white'
                 )
 
                 # Agregar bandas de color según ICA
                 bands = [
-                    {'y0':0, 'y1':50, 'color':'#a8e6a1', 'label':'Bueno (0-50)'},
-                    {'y0':51, 'y1':100, 'color':'#fff3a1', 'label':'Moderado (51-100)'},
-                    {'y0':101, 'y1':150, 'color':'#ffcc99', 'label':'Desfavorable (G. Sensibles)'},
-                    {'y0':151, 'y1':200, 'color':'#ff9999', 'label':'Dañino (151-200)'}
+                    {'y0': 0, 'y1': 50, 'color': '#a8e6a1',
+                        'label': 'Bueno (0-50)'},
+                    {'y0': 51, 'y1': 100, 'color': '#fff3a1',
+                        'label': 'Moderado (51-100)'},
+                    {'y0': 101, 'y1': 150, 'color': '#ffcc99',
+                        'label': 'Desfavorable (G. Sensibles)'},
+                    {'y0': 151, 'y1': 200, 'color': '#ff9999',
+                        'label': 'Dañino (151-200)'}
                 ]
-                
+
                 # Definir el rango máximo del eje Y
-                max_y = max(200, df_ica_daily[data_col].max() * 1.1) # Asegura que al menos llegue a 200
+                # Asegura que al menos llegue a 200
+                max_y = max(200, df_ica_daily[data_col].max() * 1.1)
 
                 for b in bands:
                     fig_ica.add_hrect(
-                        y0=b['y0'], y1=b['y1'], 
+                        y0=b['y0'], y1=b['y1'],
                         fillcolor=b['color'], opacity=0.25,
                         line_width=0,
                         annotation_text=f"<b>{b['label']}</b>",
@@ -823,7 +868,7 @@ elif menu == "Análisis por Estación":
                     yaxis_range=[0, max_y],
                     title_x=0.5
                 )
-                
+
                 st.plotly_chart(fig_ica, use_container_width=True)
 
     else:
@@ -839,7 +884,7 @@ elif menu == "Análisis por Estación":
 # -----------------------------------------------
 elif menu == "Chatbot":
     st.title("Asistente Virtual EcoStats 🤖")
-    
+
     # --- DATOS DE ESTADÍSTICAS GLOBALES PARA EL CHATBOT ---
     # ¡ESTE DICCIONARIO AHORA INCLUYE 'ica'!
     STATION_STATS_DATA = {
@@ -976,15 +1021,17 @@ elif menu == "Chatbot":
             }
         }
     }
-    
+
     # Aseguramos que la lista esté ordenada para que los números coincidan
     unique_stations = sorted(list(STATION_STATS_DATA.keys()))
     station_count = len(unique_stations)
-    
+
     # 1. Crear el índice numérico y la lista enumerada
-    station_index_map = {index + 1: station for index, station in enumerate(unique_stations)}
-    numbered_list_str = "\n".join([f"{i}. {station}" for i, station in station_index_map.items()])
-    
+    station_index_map = {index + 1: station for index,
+                         station in enumerate(unique_stations)}
+    numbered_list_str = "\n".join(
+        [f"{i}. {station}" for i, station in station_index_map.items()])
+
     # Mapeo de palabras a números (para consultas)
     number_word_map = {
         'primera': 1, '1ra': 1, '1': 1,
@@ -999,18 +1046,18 @@ elif menu == "Chatbot":
         'décima': 10, 'decima': 10, '10ma': 10, '10': 10,
         'onceava': 11, '11va': 11, '11': 11
     }
-    
+
     # Mapeo de variables amigables para el Chatbot
     variable_friendly_map = {
         "temperatura": "Temperatura", "humedad": "Humedad Relativa", "precipitacion": "Precipitación",
         "pm2_5": "PM2.5", "viento_velocidad": "Velocidad del Viento", "presion": "Presión Barométrica",
-        "ica": "Índice de Calidad del Aire (ICA)" # <-- ¡ICA AÑADIDO!
+        "ica": "Índice de Calidad del Aire (ICA)"  # <-- ¡ICA AÑADIDO!
     }
-    
+
     # -----------------------------------------------------
 
     st.title("Asistente Virtual EcoStats 🤖")
-    
+
     # Inicializar el historial del chat
     if "messages" not in st.session_state:
         st.session_state.messages = [
@@ -1027,7 +1074,7 @@ elif menu == "Chatbot":
     if prompt := st.chat_input("Escribe tu pregunta aquí... (ej. 'temperatura máxima de Halley UIS')"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         prompt_lower = prompt.lower()
-        
+
         # Mostrar mensaje del usuario
         with st.chat_message("user"):
             st.markdown(prompt)
@@ -1037,13 +1084,14 @@ elif menu == "Chatbot":
             response = ""
 
             # --- DICCIONARIOS DE MAPPING PARA CONSULTAS ---
-            stat_keywords = {'máxima': 'max', 'maxima': 'max', 'mínima': 'min', 'minima': 'min', 'media': 'mean', 'promedio': 'mean', 'total': 'sum', 'sumatoria': 'sum'}
+            stat_keywords = {'máxima': 'max', 'maxima': 'max', 'mínima': 'min', 'minima': 'min',
+                             'media': 'mean', 'promedio': 'mean', 'total': 'sum', 'sumatoria': 'sum'}
             var_map_query = {
-                'temperatura': 'temperatura', 'temp': 'temperatura', 'humedad': 'humedad', 
-                'precipitación': 'precipitacion', 'lluvia': 'precipitacion', 'pm2.5': 'pm2_5', 
-                'viento': 'viento_velocidad', 'velocidad': 'viento_velocidad', 
-                'presión': 'presion', 'presion': 'presion', 
-                'ica': 'ica', 'calidad del aire': 'ica' # <-- ¡ICA AÑADIDO!
+                'temperatura': 'temperatura', 'temp': 'temperatura', 'humedad': 'humedad',
+                'precipitación': 'precipitacion', 'lluvia': 'precipitacion', 'pm2.5': 'pm2_5',
+                'viento': 'viento_velocidad', 'velocidad': 'viento_velocidad',
+                'presión': 'presion', 'presion': 'presion',
+                'ica': 'ica', 'calidad del aire': 'ica'  # <-- ¡ICA AÑADIDO!
             }
 
             found_stat_key = None
@@ -1052,13 +1100,13 @@ elif menu == "Chatbot":
             found_station_by_number = False
 
             # 1. Identificar la estadística, variable y estación
-            
+
             # Intento 1: Identificar por Nombre
             for station_name in unique_stations:
                 if station_name.lower() in prompt_lower:
                     found_station = station_name
                     break
-            
+
             # Intento 2: Identificar por Número (ej. 'primera estación', 'dame la 1')
             if not found_station:
                 for word in prompt_lower.split():
@@ -1071,22 +1119,21 @@ elif menu == "Chatbot":
 
             for keyword, stat_name in stat_keywords.items():
                 if keyword in prompt_lower:
-                    found_stat_key = stat_name.lower() # Usamos minúsculas para json_key
+                    found_stat_key = stat_name.lower()  # Usamos minúsculas para json_key
                     break
-            
+
             for keyword, var_name in var_map_query.items():
                 if keyword in prompt_lower:
                     found_var_key = var_name
                     break
 
-            
             # -------------------------------------------------------------------
             # --- LÓGICA DE ESTADÍSTICAS ESPECÍFICAS (Temp Max, Precip Total, etc.) ---
             # -------------------------------------------------------------------
             if found_stat_key and found_var_key and found_station and found_station in STATION_STATS_DATA:
-                
+
                 station_data = STATION_STATS_DATA[found_station]['stats']
-                
+
                 # Mapear la estadística al formato de la clave JSON (max, min, mean, sum)
                 if found_var_key == 'precipitacion' and found_stat_key == 'sum':
                     json_key = 'sum'
@@ -1098,33 +1145,33 @@ elif menu == "Chatbot":
                     json_key = found_stat_key
                     stat_name_es = found_stat_key.capitalize()
 
-
                 try:
                     value = station_data[found_var_key][json_key]
                     unit = station_data[found_var_key]['unit']
-                    
+
                     response = (
                         f"La estadística **{stat_name_es} de {variable_friendly_map.get(found_var_key, found_var_key.capitalize())}** "
                         f"registrada en la estación **{found_station}** es de: **{value:.2f} {unit}**."
                     )
                 except KeyError:
-                     response = f"No pude encontrar el valor '{stat_name_es}' para la variable '{found_var_key.capitalize()}' en esa estación. Intenta preguntar solo por 'estadísticas' de la estación."
-            
+                    response = f"No pude encontrar el valor '{stat_name_es}' para la variable '{found_var_key.capitalize()}' en esa estación. Intenta preguntar solo por 'estadísticas' de la estación."
+
             # --- LÓGICA DE ESTADÍSTICAS GENERALES DE UNA ESTACIÓN (Por nombre o número) ---
             elif found_station and ("estadísticas" in prompt_lower or "datos de" in prompt_lower or "háblame de" in prompt_lower or "información de" in prompt_lower or found_station_by_number):
-                
+
                 station_data = STATION_STATS_DATA[found_station]
                 stats = station_data['stats']
-                
+
                 response = f"Aquí están las estadísticas resumidas para la estación **{found_station}**:\n\n"
                 response += f"**Ubicación:** Lat: {station_data['latitud']:.6f}, Lon: {station_data['longitud']:.6f}\n\n"
-                
+
                 # Construir el listado de estadísticas (¡AHORA INCLUYE ICA!)
                 stat_output = []
                 for var_key, stats_dict in stats.items():
-                    var_name = variable_friendly_map.get(var_key, var_key.capitalize())
+                    var_name = variable_friendly_map.get(
+                        var_key, var_key.capitalize())
                     unit = stats_dict['unit']
-                    
+
                     if var_key == 'precipitacion':
                         stat_output.append(
                             f"**{var_name}:** Total {stats_dict['sum']:.2f} {unit}, Máx (15min) {stats_dict['max']:.2f} {unit}."
@@ -1133,21 +1180,20 @@ elif menu == "Chatbot":
                         stat_output.append(
                             f"**{var_name} ({unit}):** Máx {stats_dict['max']:.2f}, Mín {stats_dict['min']:.2f}, Media {stats_dict['mean']:.2f}."
                         )
-                
-                response += "\n\n".join(stat_output)
 
+                response += "\n\n".join(stat_output)
 
             # --- LÓGICA DE CONVERSACIÓN Y SECCIONES ---
 
             elif "adios" in prompt_lower or "despido" in prompt_lower or "chao" in prompt_lower or "hasta luego" in prompt_lower:
                 response = "¡Hasta pronto! Que tengas un excelente día. Vuelve cuando quieras explorar más datos. 👋"
-            
+
             elif "hola" in prompt_lower or "saludos" in prompt_lower or "buenos dias" in prompt_lower:
                 response = "¡Hola! Soy EcoBot. Es un placer saludarte. ¿Qué te gustaría que te explique sobre el dashboard o los datos de RACiMo?"
 
             # --- CONSULTAS SOBRE ESTACIONES (Lista) ---
             elif "cuantas estaciones" in prompt_lower or "número de estaciones" in prompt_lower or "como se llaman" in prompt_lower or "cuales son" in prompt_lower or "lista de estaciones" in prompt_lower or "háblame de las estaciones" in prompt_lower:
-                
+
                 response = f"Actualmente estamos monitoreando **{station_count} estaciones** de la red RACiMo en Santander.\n\n"
                 if station_count > 0:
                     response += f"Los nombres de las estaciones son:\n\n{numbered_list_str}\n\n"
@@ -1155,7 +1201,7 @@ elif menu == "Chatbot":
 
             elif "ubicacion" in prompt_lower or "donde estan" in prompt_lower or "zona de estudio" in prompt_lower:
                 response = "Nuestra zona de estudio principal es el departamento de **Santander, Colombia**. Puedes ver los puntos exactos en la sección **'Mapa de Estaciones'**."
-            
+
             # --- LÓGICA DE VARIABLES (Definiciones) ---
             elif "pm2.5" in prompt_lower or "partículas" in prompt_lower:
                 response = (
@@ -1198,14 +1244,15 @@ elif menu == "Chatbot":
                 )
             elif "gracias" in prompt_lower:
                 response = "¡De nada! Estoy para ayudarte a entender tus datos. 😉"
-            
+
             # --- LÓGICA DE FALLO ---
-            elif not response: 
+            elif not response:
                 response = (
                     "No estoy seguro de cómo responder a eso. Intenta preguntar por una **variable** ('PM2.5', 'Temperatura'), una **sección** ('mapa', 'animación'), o una **estadística específica** (ej. 'máxima temperatura en Halley UIS')."
                 )
 
-            st.session_state.messages.append({"role": "assistant", "content": response})
+            st.session_state.messages.append(
+                {"role": "assistant", "content": response})
             with st.chat_message("assistant"):
                 st.markdown(f"🌿 **EcoBot:** {response}")
 # -----------------------------------------------
