@@ -119,8 +119,7 @@ with st.sidebar:
 # SECCIÓN: INICIO (Tus "Datos teóricos")
 # -----------------------------
 if menu == "Inicio":
-    st.markdown("<h1>🌎 <span style='color:#FFF176;'>EcoStats</span></h1>",
-                unsafe_allow_html=True)
+    st.markdown("<h1>🌎 <span style='color:#FFF176;'>EcoStats</span></h1>", unsafe_allow_html=True)
     st.markdown(
         """
         <style>
@@ -182,41 +181,59 @@ if menu == "Inicio":
         ">
             Explora, visualiza y comprende los datos ambientales de Santander — una experiencia interactiva con RACiMo.
         </p>
-        <div style="text-align:center; margin-top:30px; margin-bottom:40px;" class="fade-in">
-            <img src="https://pouch.jumpshare.com/preview/9wCPCONGBeJ9GOnB3uF4BEwEYIFdKu8ss-ssPDHI89ASlfXDRIz6eexvDq3G29-lFEICOzJf0GzmGjQEgiU4L42IMI9s50zJa-nQi_6gRUk" 
-                 alt="Animación del clima"
-                 style="width:70%; max-width:700px; border:none; border-radius:20px; box-shadow:none;">
-        </div>
+        
         <hr style="border: 1px solid #FFF176; width: 80%; margin:auto; margin-bottom:40px;">
         """,
         unsafe_allow_html=True
     )
+
     st.markdown("<h2 style='color:#FFFFFF; text-align:center; margin-top:40px;'>🌦️ Variables que podrás explorar:</h2>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
+
     with col1:
         st.markdown("""
-        <div style="background-color:#123456; padding:30px; border-radius:15px; margin-bottom:40px;">
+        <div class="variable-card">
             <h3 style="color:#FFD700;">🌡️ Temperatura</h3>
             <p style="color:#E0E0E0;">Indica qué tan caliente o frío está el ambiente. Afecta la salud, la agricultura y los ecosistemas.</p>
             <small style="color:#B0BEC5;">Un aumento sostenido puede indicar olas de calor.</small>
         </div>
-        <div style="background-color:#123456; padding:30px; border-radius:15px; margin-bottom:40px;">
+
+        <div class="variable-card">
             <h3 style="color:#FFD700;">💧 Humedad Relativa</h3>
             <p style="color:#E0E0E0;">Nos dice cuánta agua hay en el aire. Una alta humedad puede hacer que sintamos más calor.</p>
         </div>
-        <div style="background-color:#123456; padding:30px; border-radius:15px; margin-bottom:40px;">
+
+        <div class="variable-card">
             <h3 style="color:#FFD700;">🌧️ Precipitación</h3>
             <p style="color:#E0E0E0;">Cantidad de lluvia registrada. Es clave para entender sequías, inundaciones y el ciclo del agua.</p>
         </div>
+
+        <style>
+        .variable-card {
+            background-color:#123456;
+            padding:30px;
+            border-radius:15px;
+            margin-bottom:40px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            transition: transform 0.3s;
+            display: inline-block;
+            width: 100%;
+        }
+        .variable-card:hover {
+            transform: translateY(-10px);
+        }
+        </style>
         """, unsafe_allow_html=True)
+
     with col2:
         st.markdown("""
-        <div style="background-color:#123456; padding:30px; border-radius:15px; margin-bottom:40px;">
+        <div class="variable-card">
             <h3 style="color:#FFD700;">🌫️ PM2.5 (Partículas finas)</h3>
             <p style="color:#E0E0E0;">Son pequeñas partículas en el aire que pueden afectar la salud respiratoria.</p>
             <small style="color:#B0BEC5;">Se miden en microgramos por metro cúbico (µg/m³).</small>
         </div>
-        <div style="background-color:#123456; padding:30px; border-radius:15px; margin-bottom:40px;">
+
+        <div class="variable-card">
             <h3 style="color:#FFD700;">🌈 Índice de Calidad del Aire (ICA)</h3>
             <p style="color:#E0E0E0;">Nos muestra qué tan limpio o contaminado está el aire mediante una escala de colores:</p>
             <p style="color:#FFFFFF;">
@@ -224,6 +241,7 @@ if menu == "Inicio":
             </p>
         </div>
         """, unsafe_allow_html=True)
+
     st.markdown("---")
     st.markdown("""
     <h3 style="text-align:center; color:#FFF9C4; font-size:24px;">
