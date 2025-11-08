@@ -830,6 +830,10 @@ elif menu == "Análisis por Estación":
         st.warning(
             "No se pudieron cargar los datos. Verifica que 'datos_limpios.csv' esté en el mismo directorio.")
 
+
+# -----------------------------------------------
+# SECCIÓN: CHATBOT (¡CON LÓGICA CONTEXTUAL Y CORRECTA!)
+# -----------------------------------------------
 # -----------------------------------------------
 # SECCIÓN: CHATBOT (¡CON LÓGICA CONTEXTUAL Y CORRECTA!)
 # -----------------------------------------------
@@ -837,137 +841,136 @@ elif menu == "Chatbot":
     st.title("Asistente Virtual EcoStats 🤖")
     
     # --- DATOS DE ESTADÍSTICAS GLOBALES PARA EL CHATBOT ---
-    # Este diccionario contiene los valores MÁXIMO, MÍNIMO y MEDIO (o SUMA)
-    # de cada variable por estación, calculados previamente.
+    # ¡ESTE DICCIONARIO AHORA INCLUYE 'ica'!
     STATION_STATS_DATA = {
         "Barranca-RacimoOrquidea": {
-            "latitud": 7.068842,
-            "longitud": -73.85138,
+            "latitud": 7.068842, "longitud": -73.85138,
             "stats": {
                 "temperatura": {"max": 36.67, "min": 17.44, "mean": 27.87, "unit": "°C"},
                 "humedad": {"max": 95.40, "min": 45.30, "mean": 77.54, "unit": "%"},
                 "precipitacion": {"max": 30.60, "sum": 655.60, "mean": 0.12, "unit": "mm"},
                 "pm2_5": {"max": 54.47, "min": 0.00, "mean": 9.13, "unit": "µg/m³"},
+                "ica": {"max": 128.49, "min": 0.00, "mean": 28.25, "unit": ""},
                 "viento_velocidad": {"max": 16.35, "min": 0.00, "mean": 3.38, "unit": "km/h"},
                 "presion": {"max": 1019.57, "min": 1003.62, "mean": 1010.60, "unit": "hPa"}
             }
         },
         "Halley UIS": {
-            "latitud": 7.13908,
-            "longitud": -73.12137,
+            "latitud": 7.13908, "longitud": -73.12137,
             "stats": {
                 "temperatura": {"max": 31.17, "min": 22.28, "mean": 26.72, "unit": "°C"},
                 "humedad": {"max": 96.00, "min": 45.00, "mean": 79.36, "unit": "%"},
                 "precipitacion": {"max": 0.80, "sum": 108.60, "mean": 0.02, "unit": "mm"},
                 "pm2_5": {"max": 2.43, "min": 1.45, "mean": 1.94, "unit": "µg/m³"},
+                "ica": {"max": 7.89, "min": 4.71, "mean": 6.30, "unit": ""},
                 "viento_velocidad": {"max": 16.09, "min": 0.00, "mean": 1.96, "unit": "km/h"},
                 "presion": {"max": 1016.49, "min": 1003.42, "mean": 1011.17, "unit": "hPa"}
             }
         },
         "RACIMO-SOCORROCONS4": {
-            "latitud": 6.461252,
-            "longitud": -73.25759,
+            "latitud": 6.461252, "longitud": -73.25759,
             "stats": {
                 "temperatura": {"max": 30.78, "min": 15.72, "mean": 21.59, "unit": "°C"},
                 "humedad": {"max": 96.70, "min": 36.50, "mean": 81.04, "unit": "%"},
                 "precipitacion": {"max": 12.00, "sum": 281.20, "mean": 0.05, "unit": "mm"},
                 "pm2_5": {"max": 322.42, "min": 0.00, "mean": 2.56, "unit": "µg/m³"},
+                "ica": {"max": 372.27, "min": 0.00, "mean": 8.16, "unit": ""},
                 "viento_velocidad": {"max": 11.59, "min": 0.00, "mean": 3.23, "unit": "km/h"},
                 "presion": {"max": 1023.03, "min": 1009.52, "mean": 1017.49, "unit": "hPa"}
             }
         },
         "RACiMo BarbosaAir2.1": {
-            "latitud": 5.92901,
-            "longitud": -73.61547,
+            "latitud": 5.92901, "longitud": -73.61547,
             "stats": {
                 "temperatura": {"max": 31.78, "min": 15.89, "mean": 23.94, "unit": "°C"},
                 "humedad": {"max": 82.00, "min": 29.20, "mean": 61.88, "unit": "%"},
                 "precipitacion": {"max": 0.00, "sum": 0.00, "mean": 0.00, "unit": "mm"},
                 "pm2_5": {"max": 305.55, "min": 0.00, "mean": 13.21, "unit": "µg/m³"},
+                "ica": {"max": 355.56, "min": 0.00, "mean": 36.33, "unit": ""},
                 "viento_velocidad": {"max": 6.47, "min": 0.08, "mean": 3.28, "unit": "km/h"},
                 "presion": {"max": 1049.99, "min": 1016.28, "mean": 1035.37, "unit": "hPa"}
             }
         },
         "RACiMo BarbosaCONS2": {
-            "latitud": 5.949394,
-            "longitud": -73.60563,
+            "latitud": 5.949394, "longitud": -73.60563,
             "stats": {
                 "temperatura": {"max": 30.06, "min": 12.72, "mean": 20.07, "unit": "°C"},
                 "humedad": {"max": 97.30, "min": 31.60, "mean": 80.28, "unit": "%"},
                 "precipitacion": {"max": 9.80, "sum": 385.80, "mean": 0.06, "unit": "mm"},
                 "pm2_5": {"max": 349.67, "min": 0.00, "mean": 5.68, "unit": "µg/m³"},
+                "ica": {"max": 451.16, "min": 0.00, "mean": 16.43, "unit": ""},
                 "viento_velocidad": {"max": 17.14, "min": 0.00, "mean": 2.81, "unit": "km/h"},
                 "presion": {"max": 1025.26, "min": 1013.48, "mean": 1020.40, "unit": "hPa"}
             }
         },
         "RACiMo BarrancaAIR1.1": {
-            "latitud": 7.077814,
-            "longitud": -73.85829,
+            "latitud": 7.077814, "longitud": -73.85829,
             "stats": {
                 "temperatura": {"max": 38.28, "min": 23.50, "mean": 30.36, "unit": "°C"},
                 "humedad": {"max": 96.50, "min": 42.30, "mean": 67.35, "unit": "%"},
                 "precipitacion": {"max": 0.00, "sum": 0.00, "mean": 0.00, "unit": "mm"},
                 "pm2_5": {"max": 357.39, "min": 0.00, "mean": 11.30, "unit": "µg/m³"},
+                "ica": {"max": 402.05, "min": 0.00, "mean": 33.47, "unit": ""},
                 "viento_velocidad": {"max": 8.59, "min": 7.64, "mean": 8.12, "unit": "km/h"},
                 "presion": {"max": 1024.30, "min": 1018.46, "mean": 1021.38, "unit": "hPa"}
             }
         },
         "RACiMo BucGuatiAIR5.1": {
-            "latitud": 6.994449,
-            "longitud": -73.066086,
+            "latitud": 6.994449, "longitud": -73.066086,
             "stats": {
                 "temperatura": {"max": 28.11, "min": 19.00, "mean": 23.43, "unit": "°C"},
                 "humedad": {"max": 92.80, "min": 52.00, "mean": 76.98, "unit": "%"},
                 "precipitacion": {"max": 0.00, "sum": 0.00, "mean": 0.00, "unit": "mm"},
                 "pm2_5": {"max": 128.50, "min": 0.00, "mean": 6.33, "unit": "µg/m³"},
+                "ica": {"max": 187.36, "min": 0.00, "mean": 20.12, "unit": ""},
                 "viento_velocidad": {"max": 7.64, "min": 5.48, "mean": 6.56, "unit": "km/h"},
                 "presion": {"max": 1037.62, "min": 1024.30, "mean": 1030.96, "unit": "hPa"}
             }
         },
         "RACiMo BucSanAIR5": {
-            "latitud": 7.1386485,
-            "longitud": -73.122185,
+            "latitud": 7.1386485, "longitud": -73.122185,
             "stats": {
                 "temperatura": {"max": 29.22, "min": 21.94, "mean": 25.38, "unit": "°C"},
                 "humedad": {"max": 82.30, "min": 44.90, "mean": 68.68, "unit": "%"},
                 "precipitacion": {"max": 0.00, "sum": 0.00, "mean": 0.00, "unit": "mm"},
                 "pm2_5": {"max": 62.34, "min": 0.00, "mean": 7.29, "unit": "µg/m³"},
+                "ica": {"max": 143.97, "min": 0.00, "mean": 22.85, "unit": ""},
                 "viento_velocidad": {"max": 5.48, "min": 2.48, "mean": 3.98, "unit": "km/h"},
                 "presion": {"max": 1049.99, "min": 1037.63, "mean": 1044.82, "unit": "hPa"}
             }
         },
         "RACiMo MalagaAIR3.1": {
-            "latitud": 6.698055,
-            "longitud": -72.73542,
+            "latitud": 6.698055, "longitud": -72.73542,
             "stats": {
                 "temperatura": {"max": 26.89, "min": 11.83, "mean": 18.89, "unit": "°C"},
                 "humedad": {"max": 100.00, "min": 33.20, "mean": 70.16, "unit": "%"},
                 "precipitacion": {"max": 0.00, "sum": 0.00, "mean": 0.00, "unit": "mm"},
                 "pm2_5": {"max": 24.54, "min": 0.00, "mean": 2.69, "unit": "µg/m³"},
+                "ica": {"max": 68.79, "min": 0.00, "mean": 8.74, "unit": ""},
                 "viento_velocidad": {"max": 2.48, "min": 0.00, "mean": 1.24, "unit": "km/h"},
                 "presion": {"max": 1043.76, "min": 1028.01, "mean": 1035.88, "unit": "hPa"}
             }
         },
         "RACiMo MalagaCONS3": {
-            "latitud": 6.700839,
-            "longitud": -72.727615,
+            "latitud": 6.700839, "longitud": -72.727615,
             "stats": {
                 "temperatura": {"max": 28.44, "min": 12.17, "mean": 18.07, "unit": "°C"},
                 "humedad": {"max": 96.60, "min": 31.30, "mean": 75.70, "unit": "%"},
                 "precipitacion": {"max": 18.40, "sum": 366.40, "mean": 0.07, "unit": "mm"},
                 "pm2_5": {"max": 58.24, "min": 0.00, "mean": 2.83, "unit": "µg/m³"},
+                "ica": {"max": 135.91, "min": 0.00, "mean": 9.13, "unit": ""},
                 "viento_velocidad": {"max": 13.45, "min": 0.00, "mean": 1.74, "unit": "km/h"},
                 "presion": {"max": 1029.67, "min": 1019.24, "mean": 1024.87, "unit": "hPa"}
             }
         },
         "RACiMo SocConvAir4.1": {
-            "latitud": 6.4681354,
-            "longitud": -73.25675,
+            "latitud": 6.4681354, "longitud": -73.25675,
             "stats": {
                 "temperatura": {"max": 30.50, "min": 19.39, "mean": 24.50, "unit": "°C"},
                 "humedad": {"max": 83.70, "min": 34.70, "mean": 66.62, "unit": "%"},
                 "precipitacion": {"max": 0.00, "sum": 0.00, "mean": 0.00, "unit": "mm"},
                 "pm2_5": {"max": 82.66, "min": 0.00, "mean": 4.53, "unit": "µg/m³"},
+                "ica": {"max": 160.90, "min": 0.00, "mean": 14.34, "unit": ""},
                 "viento_velocidad": {"max": 5.66, "min": 5.66, "mean": 5.66, "unit": "km/h"},
                 "presion": {"max": 1023.43, "min": 1023.43, "mean": 1023.43, "unit": "hPa"}
             }
@@ -1000,7 +1003,8 @@ elif menu == "Chatbot":
     # Mapeo de variables amigables para el Chatbot
     variable_friendly_map = {
         "temperatura": "Temperatura", "humedad": "Humedad Relativa", "precipitacion": "Precipitación",
-        "pm2_5": "PM2.5", "viento_velocidad": "Velocidad del Viento", "presion": "Presión Barométrica"
+        "pm2_5": "PM2.5", "viento_velocidad": "Velocidad del Viento", "presion": "Presión Barométrica",
+        "ica": "Índice de Calidad del Aire (ICA)" # <-- ¡ICA AÑADIDO!
     }
     
     # -----------------------------------------------------
@@ -1034,7 +1038,13 @@ elif menu == "Chatbot":
 
             # --- DICCIONARIOS DE MAPPING PARA CONSULTAS ---
             stat_keywords = {'máxima': 'max', 'maxima': 'max', 'mínima': 'min', 'minima': 'min', 'media': 'mean', 'promedio': 'mean', 'total': 'sum', 'sumatoria': 'sum'}
-            var_map_query = {'temperatura': 'temperatura', 'temp': 'temperatura', 'humedad': 'humedad', 'precipitación': 'precipitacion', 'lluvia': 'precipitacion', 'pm2.5': 'pm2_5', 'viento': 'viento_velocidad', 'presión': 'presion', 'presion': 'presion', 'velocidad': 'viento_velocidad'}
+            var_map_query = {
+                'temperatura': 'temperatura', 'temp': 'temperatura', 'humedad': 'humedad', 
+                'precipitación': 'precipitacion', 'lluvia': 'precipitacion', 'pm2.5': 'pm2_5', 
+                'viento': 'viento_velocidad', 'velocidad': 'viento_velocidad', 
+                'presión': 'presion', 'presion': 'presion', 
+                'ica': 'ica', 'calidad del aire': 'ica' # <-- ¡ICA AÑADIDO!
+            }
 
             found_stat_key = None
             found_var_key = None
@@ -1061,7 +1071,7 @@ elif menu == "Chatbot":
 
             for keyword, stat_name in stat_keywords.items():
                 if keyword in prompt_lower:
-                    found_stat_key = stat_name
+                    found_stat_key = stat_name.lower() # Usamos minúsculas para json_key
                     break
             
             for keyword, var_name in var_map_query.items():
@@ -1078,14 +1088,14 @@ elif menu == "Chatbot":
                 station_data = STATION_STATS_DATA[found_station]['stats']
                 
                 # Mapear la estadística al formato de la clave JSON (max, min, mean, sum)
-                if found_var_key == 'precipitacion' and found_stat_key.lower() == 'sum':
+                if found_var_key == 'precipitacion' and found_stat_key == 'sum':
                     json_key = 'sum'
                     stat_name_es = 'Total Acumulada'
-                elif found_var_key == 'precipitacion' and found_stat_key.lower() == 'max':
+                elif found_var_key == 'precipitacion' and found_stat_key == 'max':
                     json_key = 'max'
                     stat_name_es = 'Máxima (15min)'
                 else:
-                    json_key = found_stat_key.lower()
+                    json_key = found_stat_key
                     stat_name_es = found_stat_key.capitalize()
 
 
@@ -1098,7 +1108,7 @@ elif menu == "Chatbot":
                         f"registrada en la estación **{found_station}** es de: **{value:.2f} {unit}**."
                     )
                 except KeyError:
-                     response = f"No pude encontrar el valor '{found_stat_key}' para la variable '{found_var_key.capitalize()}' en esa estación. Intenta preguntar solo por 'estadísticas' de la estación."
+                     response = f"No pude encontrar el valor '{stat_name_es}' para la variable '{found_var_key.capitalize()}' en esa estación. Intenta preguntar solo por 'estadísticas' de la estación."
             
             # --- LÓGICA DE ESTADÍSTICAS GENERALES DE UNA ESTACIÓN (Por nombre o número) ---
             elif found_station and ("estadísticas" in prompt_lower or "datos de" in prompt_lower or "háblame de" in prompt_lower or "información de" in prompt_lower or found_station_by_number):
@@ -1106,11 +1116,10 @@ elif menu == "Chatbot":
                 station_data = STATION_STATS_DATA[found_station]
                 stats = station_data['stats']
                 
-                # --- ¡NUEVO! Añadimos Latitud y Longitud ---
                 response = f"Aquí están las estadísticas resumidas para la estación **{found_station}**:\n\n"
                 response += f"**Ubicación:** Lat: {station_data['latitud']:.6f}, Lon: {station_data['longitud']:.6f}\n\n"
                 
-                # Construir el listado de estadísticas
+                # Construir el listado de estadísticas (¡AHORA INCLUYE ICA!)
                 stat_output = []
                 for var_key, stats_dict in stats.items():
                     var_name = variable_friendly_map.get(var_key, var_key.capitalize())
@@ -1170,6 +1179,11 @@ elif menu == "Chatbot":
                     "**Viento**: Analizamos dos gráficos en 'Análisis por Estación':\n"
                     "1. **Velocidad Viento (km/h)**: Un gráfico de línea que muestra las ráfagas.\n"
                     "2. **Dirección Viento (Rosa)**: Un gráfico polar que muestra la dirección *predominante* (de dónde viene el viento)."
+                )
+            elif "ica" in prompt_lower or "calidad del aire" in prompt_lower:
+                response = (
+                    "**ICA (Índice de Calidad del Aire)**: Es un indicador que te dice qué tan limpio está el aire. "
+                    "El gráfico en 'Análisis por Estación' muestra bandas de colores (🟢, 🟡, 🟠, 🔴) para que veas el nivel de riesgo."
                 )
 
             # --- LÓGICA DE NAVEGACIÓN ---
