@@ -4,7 +4,7 @@ import pandas as pd
 import altair as alt
 import plotly.express as px
 import numpy as np
-import pydeck as pdk  # <-- AÑADIDO: Necesario para el mapa de estaciones
+import pydeck as pdk
 
 # -----------------------------
 # CONFIGURACIÓN DE LA PÁGINA
@@ -20,7 +20,7 @@ COLUMN_RENAME_MAP = {
     "nombre_estacion": "estacion",
     "lluvia_mm": "precipitacion",
     "temp_ext_media_c": "temperatura",
-    "temp_ext_media_C": "temperatura",  # Maneja ambas mayúsculas
+    "temp_ext_media_C": "temperatura",
     "hum_ext_ult": "humedad",
     "pm_2p5_media_ugm3": "pm2_5",
     "aqi_media_val": "ica",
@@ -40,14 +40,9 @@ NUMERIC_COLS = [
 def load_data(file_path):
     try:
         df = pd.read_csv(file_path)
-
-        # 1. Limpiar nombres de columnas
         df.columns = [col.lower().strip() for col in df.columns]
-
-        # 2. Renombrar usando el mapa
         df = df.rename(columns=COLUMN_RENAME_MAP)
 
-        # 3. Convertir timestamp
         if 'timestamp' in df.columns:
             df['timestamp'] = pd.to_datetime(df['timestamp'])
             df['month'] = df['timestamp'].dt.month
@@ -55,16 +50,10 @@ def load_data(file_path):
             st.error("Error: La columna 'timestamp' no se encuentra en los datos.")
             return None
 
-        # 4. Convertir columnas a numérico
         for col in NUMERIC_COLS:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
-            else:
-                # Informar si falta una columna esperada (opcional)
-                print(
-                    f"Advertencia: La columna '{col}' no se encontró y no será cargada.")
-
-        # 5. Asegurar latitud y longitud
+        
         if 'latitud' not in df.columns or 'longitud' not in df.columns:
             st.error("Error: Faltan columnas 'latitud' o 'longitud' en los datos.")
             return None
@@ -74,22 +63,31 @@ def load_data(file_path):
     except FileNotFoundError:
         st.error(
             f"Error: No se pudo encontrar el archivo de datos en: {file_path}")
+        st.error("Asegúrate de que 'datos_limpios.csv' esté en una carpeta llamada 'data' en el mismo nivel que 'app_streamlit.py'.")
         return None
     except Exception as e:
         st.error(f"Error al cargar los datos: {e}")
         return None
 
 
-# --- ¡CORRECCIÓN CRÍTICA DE RUTA! ---
-# Esto asume que 'datos_limpios.csv' está en el MISMO directorio que 'app_streamlit.py'
-FILE_PATH = 'datos_limpios.csv'
+# --- FUNCIÓN CENTRALIZADA PARA OBTENER DATOS VÁLIDOS ---
+def get_valid_data(df_filtered, data_col):
+    """Retorna el DataFrame filtrado y sin NaN en la columna de datos."""
+    if data_col in df_filtered.columns:
+        # Aquí eliminamos los NaN en la columna de interés
+        return df_filtered.dropna(subset=[data_col])
+    return pd.DataFrame() # Retorna DataFrame vacío si la columna no existe o no hay datos
+
+
+# --- RUTA RELATIVA PARA TODOS ---
+FILE_PATH = 'data/datos_limpios.csv'
 df = load_data(FILE_PATH)
 
 # Diccionario para mapear número de mes a nombre (en español)
 month_map = {9: "Septiembre", 10: "Octubre", 11: "Noviembre"}
 
 # -----------------------------
-# MENÚ PRINCIPAL (¡REESTRUCTURADO!)
+# MENÚ PRINCIPAL
 # -----------------------------
 with st.sidebar:
     st.markdown("## 🌎 EcoStats")
@@ -98,18 +96,18 @@ with st.sidebar:
         menu_title="Menú Principal",
         options=[
             "Inicio",
-            "Mapa de Estaciones",      # Objetivo 1
-            "Animación de Datos",      # Objetivo 3 (¡El principal!)
-            "Análisis por Estación",   # Objetivo 2 (Tu sección)
-            "Chatbot",                 # Objetivo 4
+            "Mapa de Estaciones",
+            "Animación de Datos",
+            "Análisis por Estación",
+            "Chatbot",
             "Equipo"
         ],
         icons=[
             "house",
-            "map",                     # Icono para Mapa
-            "play-btn-fill",           # Icono para Animación
-            "bar-chart-line",          # Icono para Análisis
-            "chat-dots",               # Icono para Chatbot
+            "map",
+            "play-btn-fill",
+            "bar-chart-line",
+            "chat-dots",
             "people"
         ],
         menu_icon="cast",
@@ -121,7 +119,6 @@ with st.sidebar:
 # SECCIÓN: INICIO (Tus "Datos teóricos")
 # -----------------------------
 if menu == "Inicio":
-    # (Tu código HTML para la portada se mantiene)
     st.markdown("<h1>🌎 <span style='color:#FFF176;'>EcoStats</span></h1>",
                 unsafe_allow_html=True)
     st.markdown(
@@ -241,63 +238,31 @@ if menu == "Inicio":
         "Agradecimientos a la Red Ambiental Ciudadana de Monitoreo (RACiMo). [Visita su página aquí](https://class.redclara.net/halley/moncora/intro.html).")
 
 # -----------------------------------------------
-# SECCIÓN: MAPA DE ESTACIONES (¡NUEVO!)
+# SECCIÓN: MAPA DE ESTACIONES
 # -----------------------------------------------
 elif menu == "Mapa de Estaciones":
     st.title("Mapa de Ubicación de Estaciones RACiMo")
     st.write("Explora la ubicación geográfica de cada estación de monitoreo.")
 
     if df is not None:
-        # Obtenemos las ubicaciones únicas de las estaciones
         locations = df.drop_duplicates(subset=['estacion'])[
             ['estacion', 'latitud', 'longitud']]
-        # Pydeck prefiere 'lat' y 'lon'
         locations = locations.rename(
             columns={"latitud": "lat", "longitud": "lon"})
 
-        # Centramos el mapa
         mid_lat = locations['lat'].mean()
         mid_lon = locations['lon'].mean()
 
-        view_state = pdk.ViewState(
-            latitude=mid_lat,
-            longitude=mid_lon,
-            zoom=8,
-            pitch=50,
-        )
-
-        # Capa para los puntos
-        layer = pdk.Layer(
-            "ScatterplotLayer",
-            data=locations,
-            get_position='[lon, lat]',
-            get_color='[200, 30, 0, 160]',  # Color RGB
-            get_radius=500,  # Radio en metros
-            pickable=True,
-            auto_highlight=True
-        )
-
-        # Tooltip
-        tooltip = {
-            "html": "<b>Estación:</b> {estacion}",
-            "style": {
-                "backgroundColor": "steelblue",
-                "color": "white"
-            }
-        }
-
-        # Renderizar el mapa
-        st.pydeck_chart(pdk.Deck(
-            map_style='mapbox://styles/mapbox/light-v9',
-            initial_view_state=view_state,
-            layers=[layer],
-            tooltip=tooltip
-        ))
+        # Usamos st.map() como solución simple y robusta
+        if not locations.empty:
+            st.map(locations)
+        else:
+            st.warning("No se encontraron datos de ubicación (lat, lon) después de la carga.")
     else:
         st.warning("No se pudieron cargar los datos para el mapa.")
 
 # -----------------------------------------------
-# SECCIÓN: ANIMACIÓN DE DATOS (¡NUEVO - CLAVE DEL RETO!)
+# SECCIÓN: ANIMACIÓN DE DATOS
 # -----------------------------------------------
 elif menu == "Animación de Datos":
     st.title("Animación de Datos Ambientales")
@@ -305,17 +270,10 @@ elif menu == "Animación de Datos":
 
     if df is not None:
         df_anim = df.copy()
-
-        # Asegurarnos que el timestamp está ordenado
         df_anim = df_anim.sort_values(by="timestamp")
-
-        # --- Optimización para la animación ---
-        # Creamos una columna 'fecha_hora' como string para el 'animation_frame'
-        # Agrupar por hora mejora el rendimiento y la visualización
         df_anim['fecha_hora_anim'] = df_anim['timestamp'].dt.strftime(
             '%Y-%m-%d %H:00')
 
-        # Agrupamos los datos por estación y hora
         df_anim_grouped = df_anim.groupby(['estacion', 'latitud', 'longitud', 'fecha_hora_anim']).agg({
             'temperatura': 'mean',
             'precipitacion': 'sum',
@@ -325,26 +283,23 @@ elif menu == "Animación de Datos":
             'presion': 'mean'
         }).reset_index()
 
-        # --- Selectores ---
         variables_anim_list = [
             'temperatura', 'precipitacion', 'humedad', 'pm2_5', 'ica', 'presion']
         variable_anim_choice = st.selectbox(
             "Selecciona la variable a animar:",
             variables_anim_list,
-            index=0  # 'temperatura' por defecto
+            index=0
         )
 
         st.info("💡 Consejo: Usa el control deslizante de tiempo y el botón de 'Play' en la parte inferior del mapa.")
 
-        # --- El Gráfico Animado ---
         fig_anim = px.scatter_mapbox(
             df_anim_grouped.dropna(
-                # Evitar errores
                 subset=[variable_anim_choice, 'latitud', 'longitud']),
             lat="latitud",
             lon="longitud",
-            size=variable_anim_choice,  # El tamaño del círculo representa la variable
-            color=variable_anim_choice,  # El color también representa la variable
+            size=variable_anim_choice,
+            color=variable_anim_choice,
             hover_name="estacion",
             hover_data={
                 "latitud": False,
@@ -352,7 +307,7 @@ elif menu == "Animación de Datos":
                 "fecha_hora_anim": True,
                 variable_anim_choice: ":.2f"
             },
-            animation_frame="fecha_hora_anim",  # ¡La magia de la animación!
+            animation_frame="fecha_hora_anim",
             color_continuous_scale=px.colors.sequential.YlOrRd,
             size_max=30,
             zoom=8,
@@ -370,7 +325,7 @@ elif menu == "Animación de Datos":
 
 
 # -----------------------------------------------
-# SECCIÓN: ANÁLISIS POR ESTACIÓN (Tu "Visualización de variables" adaptada)
+# SECCIÓN: ANÁLISIS POR ESTACIÓN
 # -----------------------------------------------
 elif menu == "Análisis por Estación":
     st.title("Análisis Detallado por Estación")
@@ -379,12 +334,9 @@ elif menu == "Análisis por Estación":
 
     if df is not None:
 
-        # --- Tres columnas para los filtros ---
         col1, col2, col3 = st.columns([2, 2, 1])
 
         with col1:
-            # --- MODIFICADO ---
-            # Opciones adaptadas a los nuevos nombres de columnas
             variable_map = {
                 "PM2.5 (µg/m³)": "pm2_5",
                 "Temperatura (°C)": "temperatura",
@@ -399,9 +351,7 @@ elif menu == "Análisis por Estación":
                 options=list(variable_map.keys()),
                 index=0
             )
-            # Obtenemos el nombre de la columna real
             data_col = variable_map[variable_choice_label]
-            # --------------------
 
         with col2:
             station_list = df['estacion'].dropna().unique().tolist()
@@ -424,172 +374,131 @@ elif menu == "Análisis por Estación":
 
         st.markdown("---")
 
-        # --- Filtro de datos general ---
         df_filtered = df[
             (df['estacion'] == selected_station) &
             (df['month'] == selected_month_num)
         ]
-
-        # --- Lógica para mostrar el gráfico seleccionado ---
-
-        # ==========================================================
-        # GRÁFICO 1: PM2.5 (Adaptado a 'pm2_5')
-        # ==========================================================
-        if data_col == "pm2_5":
-            if not df_filtered[data_col].dropna().empty:
+        
+        # --- Obtener datos válidos para la métrica ---
+        # df_filtered_valid contendrá los datos limpios de NaN para la columna actual.
+        df_filtered_valid = get_valid_data(df_filtered, data_col)
+        
+        # --- Chequeo de datos ---
+        if df_filtered_valid.empty:
+            st.warning(f"No hay datos de {data_col} para '{selected_station}' en {month_map.get(selected_month_num, '')}.")
+        
+        else:
+            # ==========================================================
+            # GRÁFICO 1: PM2.5 (Adaptado a 'pm2_5')
+            # ==========================================================
+            if data_col == "pm2_5":
+                
+                # --- Métricas con iconos ---
                 stat_col1, stat_col2, stat_col3 = st.columns(3)
-                stat_col1.metric("📈 Máximo (µg/m³)",
-                                 f"{df_filtered[data_col].max():.2f}")
-                stat_col2.metric("📉 Mínimo (µg/m³)",
-                                 f"{df_filtered[data_col].min():.2f}")
-                stat_col3.metric("📊 Medio (µg/m³)",
-                                 f"{df_filtered[data_col].mean():.2f}")
+                stat_col1.metric("📈 Máximo (µg/m³)", f"{df_filtered_valid[data_col].max():.2f}")
+                stat_col2.metric("📉 Mínimo (µg/m³)", f"{df_filtered_valid[data_col].min():.2f}")
+                stat_col3.metric("📊 Medio (µg/m³)", f"{df_filtered_valid[data_col].mean():.2f}")
                 st.markdown("---")
 
-                line_chart = alt.Chart(df_filtered).mark_line(point=True, opacity=0.8).encode(
-                    x=alt.X('timestamp:T', title='Fecha y Hora',
-                            axis=alt.Axis(tickCount=10)),
-                    y=alt.Y(f'{data_col}:Q', title='PM2.5 (µg/m³)',
-                            scale=alt.Scale(zero=False)),
-                    tooltip=[
-                        alt.Tooltip('timestamp:T', title='Fecha y Hora',
-                                    format='%Y-%m-%d %H:%M'),
-                        alt.Tooltip(f'{data_col}:Q', title='PM2.5'),
-                        alt.Tooltip('estacion', title='Estación')]
+                line_chart = alt.Chart(df_filtered_valid).mark_line(point=True, opacity=0.8).encode(
+                    x=alt.X('timestamp:T', title='Fecha y Hora', axis=alt.Axis(tickCount=10)),
+                    y=alt.Y(f'{data_col}:Q', title='PM2.5 (µg/m³)', scale=alt.Scale(zero=False)),
+                    tooltip=['timestamp:T', f'{data_col}:Q', 'estacion']
                 )
                 rule_df = pd.DataFrame({'limite_perjudicial': [56]})
-                rule = alt.Chart(rule_df).mark_rule(color='red', strokeWidth=2, strokeDash=[
-                    5, 5]).encode(y='limite_perjudicial:Q')
-                text = alt.Chart(rule_df).mark_text(align='left', baseline='bottom', dx=5, dy=-5, color='red',
-                                                    fontSize=12).encode(y='limite_perjudicial:Q', text=alt.value('Límite Perjudicial (56 µg/m³)'))
+                rule = alt.Chart(rule_df).mark_rule(color='red', strokeWidth=2, strokeDash=[5, 5]).encode(y='limite_perjudicial:Q')
+                text = alt.Chart(rule_df).mark_text(align='left', baseline='bottom', dx=5, dy=-5, color='red', fontSize=12).encode(y='limite_perjudicial:Q', text=alt.value('Límite Perjudicial (56 µg/m³)'))
+                
                 final_chart_pm25 = alt.layer(line_chart, rule, text).properties(
                     title=f'PM2.5 para: {selected_station} ({month_map.get(selected_month_num, "")})'
                 ).interactive()
                 st.altair_chart(final_chart_pm25, use_container_width=True)
-            else:
-                st.warning(
-                    f"No hay datos de PM2.5 para '{selected_station}' en {month_map.get(selected_month_num, '')}.")
 
-        # ==========================================================
-        # GRÁFICO 2: TEMPERATURA (Adaptado a 'temperatura')
-        # ==========================================================
-        elif data_col == "temperatura":
-            dff_temp = df_filtered.dropna(subset=[data_col])
-            if not dff_temp.empty:
+            # ==========================================================
+            # GRÁFICO 2: TEMPERATURA (Adaptado a 'temperatura')
+            # ==========================================================
+            elif data_col == "temperatura":
+                
                 stat_col1, stat_col2, stat_col3 = st.columns(3)
-                stat_col1.metric(
-                    "📈 Máxima (°C)", f"{dff_temp[data_col].max():.2f}")
-                stat_col2.metric(
-                    "📉 Mínima (°C)", f"{dff_temp[data_col].min():.2f}")
-                stat_col3.metric(
-                    "📊 Media (°C)", f"{dff_temp[data_col].mean():.2f}")
+                stat_col1.metric("📈 Máxima (°C)", f"{df_filtered_valid[data_col].max():.2f}")
+                stat_col2.metric("📉 Mínima (°C)", f"{df_filtered_valid[data_col].min():.2f}")
+                stat_col3.metric("📊 Media (°C)", f"{df_filtered_valid[data_col].mean():.2f}")
                 st.markdown("---")
 
-                colorscale = [[0.0, "rgb(0, 68, 204)"], [0.33, "rgb(102, 204, 255)"], [
-                    0.66, "rgb(255, 255, 102)"], [1.0, "rgb(255, 51, 51)"]]
+                colorscale = [[0.0, "rgb(0, 68, 204)"], [0.33, "rgb(102, 204, 255)"], [0.66, "rgb(255, 255, 102)"], [1.0, "rgb(255, 51, 51)"]]
                 fig_temp = px.scatter(
-                    dff_temp, x="timestamp", y=data_col, color=data_col,
-                    color_continuous_scale=colorscale, labels={
-                        data_col: "Temperatura (°C)", "timestamp": "Tiempo"},
+                    df_filtered_valid, x="timestamp", y=data_col, color=data_col,
+                    color_continuous_scale=colorscale, labels={data_col: "Temperatura (°C)", "timestamp": "Tiempo"},
                 )
-                fig_temp.add_scatter(x=dff_temp["timestamp"], y=dff_temp[data_col], mode="lines", line=dict(
+                fig_temp.add_scatter(x=df_filtered_valid["timestamp"], y=df_filtered_valid[data_col], mode="lines", line=dict(
                     color="rgba(100,100,100,0.3)", width=2), name="Tendencia")
                 fig_temp.update_layout(
-                    title=dict(
-                        text=f"Temperatura - {selected_station} ({month_map.get(selected_month_num, "")})", x=0.5),
+                    title=dict(text=f"Temperatura - {selected_station} ({month_map.get(selected_month_num, "")})", x=0.5),
                     xaxis_title="Tiempo", yaxis_title="Temperatura (°C)", coloraxis_colorbar=dict(title="°C"),
                     plot_bgcolor="rgba(245,245,245,1)", paper_bgcolor="rgba(245,245,245,1)",
                 )
-                fig_temp.update_traces(
-                    hovertemplate="Fecha: %{x}<br>Temperatura: %{y:.2f} °C<extra></extra>")
+                fig_temp.update_traces(hovertemplate="Fecha: %{x}<br>Temperatura: %{y:.2f} °C<extra></extra>")
                 st.plotly_chart(fig_temp, use_container_width=True)
-            else:
-                st.warning(
-                    f"No hay datos de Temperatura para '{selected_station}' en {month_map.get(selected_month_num, '')}.")
 
-        # ==========================================================
-        # GRÁFICO 3: PRECIPITACIÓN (Adaptado a 'precipitacion')
-        # ==========================================================
-        elif data_col == "precipitacion":
-            dff_precip = df_filtered.dropna(subset=[data_col])
-            if not dff_precip.empty:
+
+            # ==========================================================
+            # GRÁFICO 3: PRECIPITACIÓN (Adaptado a 'precipitacion')
+            # ==========================================================
+            elif data_col == "precipitacion":
+                
                 stat_col1, stat_col2, stat_col3 = st.columns(3)
-                stat_col1.metric("🌧️ Máxima (en 15min)",
-                                 f"{dff_precip[data_col].max():.2f} mm")
-                stat_col2.metric("💧 Total Acumulada",
-                                 f"{dff_precip[data_col].sum():.2f} mm")
-                stat_col3.metric("📊 Media (por registro)",
-                                 f"{dff_precip[data_col].mean():.2f} mm")
+                stat_col1.metric("🌧️ Máxima (en 15min)", f"{df_filtered_valid[data_col].max():.2f} mm")
+                stat_col2.metric("💧 Total Acumulada", f"{df_filtered_valid[data_col].sum():.2f} mm")
+                stat_col3.metric("📊 Media (por registro)", f"{df_filtered_valid[data_col].mean():.2f} mm")
                 st.markdown("---")
 
                 fig_precip = px.area(
-                    dff_precip, x="timestamp", y=data_col,
+                    df_filtered_valid, x="timestamp", y=data_col,
                     title=f"Precipitación - {selected_station} ({month_map.get(selected_month_num, "")})",
                     color_discrete_sequence=["#0077cc"],
                 )
-                fig_precip.update_traces(
-                    line_color="#0055aa", fillcolor="rgba(0,119,204,0.3)")
+                fig_precip.update_traces(line_color="#0055aa", fillcolor="rgba(0,119,204,0.3)")
                 fig_precip.update_layout(
                     template="plotly_white", xaxis_title="Fecha", yaxis_title="Precipitación (mm)",
                     title_x=0.5, hovermode="x unified",
                 )
                 st.plotly_chart(fig_precip, use_container_width=True)
-            else:
-                st.warning(
-                    f"No hay datos de Precipitación para '{selected_station}' en {month_map.get(selected_month_num, '')}.")
 
-        # ==========================================================
-        # GRÁFICO 4: HEATMAP DE HUMEDAD (Adaptado a 'humedad')
-        # ==========================================================
-        elif data_col == "humedad":
-            df_filtered_hum = df_filtered.dropna(subset=[data_col])
-            if not df_filtered_hum.empty:
+            # ==========================================================
+            # GRÁFICO 4: HEATMAP DE HUMEDAD (Adaptado a 'humedad')
+            # ==========================================================
+            elif data_col == "humedad":
+                
                 stat_col1, stat_col2, stat_col3 = st.columns(3)
-                stat_col1.metric("📈 Humedad Máxima (%)",
-                                 f"{df_filtered_hum[data_col].max():.2f}")
-                stat_col2.metric("📉 Humedad Mínima (%)",
-                                 f"{df_filtered_hum[data_col].min():.2f}")
-                stat_col3.metric("📊 Humedad Media (%)",
-                                 f"{df_filtered_hum[data_col].mean():.2f}")
+                stat_col1.metric("📈 Humedad Máxima (%)", f"{df_filtered_valid[data_col].max():.2f}")
+                stat_col2.metric("📉 Humedad Mínima (%)", f"{df_filtered_valid[data_col].min():.2f}")
+                stat_col3.metric("📊 Humedad Media (%)", f"{df_filtered_valid[data_col].mean():.2f}")
                 st.markdown("---")
 
-                heatmap = alt.Chart(df_filtered_hum).mark_rect().encode(
-                    x=alt.X(
-                        'date(timestamp):O', title=f"Día de {month_map.get(selected_month_num, '')}"),
+                heatmap = alt.Chart(df_filtered_valid).mark_rect().encode(
+                    x=alt.X('date(timestamp):O', title=f"Día de {month_map.get(selected_month_num, '')}"),
                     y=alt.Y('hours(timestamp):O', title='Hora del Día'),
                     color=alt.Color(f'mean({data_col}):Q', title='Humedad Promedio (%)', scale=alt.Scale(
                         scheme='tealblues')),
-                    tooltip=[
-                        alt.Tooltip('timestamp:T', title='Fecha y Hora',
-                                    format='%Y-%m-%d %H:%M'),
-                        alt.Tooltip(f'mean({data_col}):Q',
-                                    title='Humedad Promedio'),
-                        alt.Tooltip('estacion', title='Estación')]
+                    tooltip=['timestamp:T', f'mean({data_col}):Q', 'estacion']
                 ).properties(
                     title=f'Mapa de Calor de Humedad - {selected_station} ({month_map.get(selected_month_num, "")})'
                 ).interactive()
                 st.altair_chart(heatmap, use_container_width=True)
-            else:
-                st.warning(
-                    f"No hay datos de Humedad para '{selected_station}' en {month_map.get(selected_month_num, '')}.")
 
-        # ==========================================================
-        # GRÁFICO 5: VELOCIDAD VIENTO (Adaptado a 'viento_velocidad')
-        # ==========================================================
-        elif data_col == "viento_velocidad":
-            dff_wind_speed = df_filtered.dropna(subset=[data_col])
-            if not dff_wind_speed.empty:
+            # ==========================================================
+            # GRÁFICO 5: VELOCIDAD VIENTO (Adaptado a 'viento_velocidad')
+            # ==========================================================
+            elif data_col == "viento_velocidad":
+                
                 stat_col1, stat_col2, stat_col3 = st.columns(3)
-                stat_col1.metric("💨 Máxima (km/h)",
-                                 f"{dff_wind_speed[data_col].max():.2f}")
-                stat_col2.metric("🍃 Mínima (km/h)",
-                                 f"{dff_wind_speed[data_col].min():.2f}")
-                stat_col3.metric("📊 Media (km/h)",
-                                 f"{dff_wind_speed[data_col].mean():.2f}")
+                stat_col1.metric("💨 Máxima (km/h)", f"{df_filtered_valid[data_col].max():.2f}")
+                stat_col2.metric("🍃 Mínima (km/h)", f"{df_filtered_valid[data_col].min():.2f}")
+                stat_col3.metric("📊 Media (km/h)", f"{df_filtered_valid[data_col].mean():.2f}")
                 st.markdown("---")
 
                 fig_wind_speed = px.line(
-                    dff_wind_speed, x="timestamp", y=data_col,
+                    df_filtered_valid, x="timestamp", y=data_col,
                     title=f"Velocidad del Viento - {selected_station} ({month_map.get(selected_month_num, "")})",
                     color_discrete_sequence=["#2ca02c"]
                 )
@@ -598,27 +507,20 @@ elif menu == "Análisis por Estación":
                     title_x=0.5, hovermode="x unified",
                 )
                 st.plotly_chart(fig_wind_speed, use_container_width=True)
-            else:
-                st.warning(
-                    f"No hay datos de Velocidad del Viento para '{selected_station}' en {month_map.get(selected_month_num, '')}.")
 
-        # ==========================================================
-        # GRÁFICO 6: PRESIÓN (Adaptado a 'presion')
-        # ==========================================================
-        elif data_col == "presion":
-            dff_pressure = df_filtered.dropna(subset=[data_col])
-            if not dff_pressure.empty:
+            # ==========================================================
+            # GRÁFICO 6: PRESIÓN (Adaptado a 'presion')
+            # ==========================================================
+            elif data_col == "presion":
+                
                 stat_col1, stat_col2, stat_col3 = st.columns(3)
-                stat_col1.metric("📈 Máxima (hPa)",
-                                 f"{dff_pressure[data_col].max():.2f}")
-                stat_col2.metric("📉 Mínima (hPa)",
-                                 f"{dff_pressure[data_col].min():.2f}")
-                stat_col3.metric(
-                    "📊 Media (hPa)", f"{dff_pressure[data_col].mean():.2f}")
+                stat_col1.metric("📈 Máxima (hPa)", f"{df_filtered_valid[data_col].max():.2f}")
+                stat_col2.metric("📉 Mínima (hPa)", f"{df_filtered_valid[data_col].min():.2f}")
+                stat_col3.metric("📊 Media (hPa)", f"{df_filtered_valid[data_col].mean():.2f}")
                 st.markdown("---")
 
                 fig_pressure = px.line(
-                    dff_pressure, x="timestamp", y=data_col,
+                    df_filtered_valid, x="timestamp", y=data_col,
                     title=f"Presión Barométrica - {selected_station} ({month_map.get(selected_month_num, "")})",
                     color_discrete_sequence=["#9467bd"]
                 )
@@ -627,65 +529,56 @@ elif menu == "Análisis por Estación":
                     title_x=0.5, hovermode="x unified",
                 )
                 st.plotly_chart(fig_pressure, use_container_width=True)
-            else:
-                st.warning(
-                    f"No hay datos de Presión para '{selected_station}' en {month_map.get(selected_month_num, '')}.")
 
-        # ==========================================================
-        # GRÁFICO 7: ROSA DE VIENTOS (Adaptado)
-        # ==========================================================
-        elif data_col == "viento_direccion":
-            dff_wind = df_filtered.dropna(
-                subset=['viento_direccion', 'viento_velocidad'])
-            if not dff_wind.empty:
-                st.info(
-                    "La Rosa de Vientos muestra la frecuencia de la dirección (de dónde viene el viento) y su intensidad.")
+            # ==========================================================
+            # GRÁFICO 7: ROSA DE VIENTOS (Adaptado)
+            # ==========================================================
+            elif data_col == "viento_direccion":
+                
+                # Para la Rosa de Vientos, necesitamos ambas columnas limpias
+                dff_wind = df_filtered_valid.dropna(subset=['viento_direccion', 'viento_velocidad'])
+                
+                if not dff_wind.empty:
+                    st.info("La Rosa de Vientos muestra la frecuencia de la dirección (de dónde viene el viento) y su intensidad.")
 
-                bins = [-0.1, 22.5, 67.5, 112.5, 157.5,
-                        202.5, 247.5, 292.5, 337.5, 360]
-                labels = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N']
-                dff_wind_binned = dff_wind.copy()
-                dff_wind_binned['Dirección'] = pd.cut(
-                    dff_wind_binned['viento_direccion'], bins=bins, labels=labels, right=True)
+                    bins = [-0.1, 22.5, 67.5, 112.5, 157.5,
+                            202.5, 247.5, 292.5, 337.5, 360]
+                    labels = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N']
+                    dff_wind_binned = dff_wind.copy()
 
-                speed_bins = [0, 5, 10, 15, 20, float('inf')]
-                speed_labels = ['0-5 km/h', '5-10 km/h',
-                                '10-15 km/h', '15-20 km/h', '>20 km/h']
-                dff_wind_binned['Velocidad (km/h)'] = pd.cut(
-                    dff_wind_binned['viento_velocidad'], bins=speed_bins, labels=speed_labels, right=False)
+                    dff_wind_binned['Dirección'] = pd.cut(
+                        dff_wind_binned['viento_direccion'], bins=bins, labels=labels, right=True, ordered=False)
 
-                wind_rose_data = dff_wind_binned.groupby(
-                    ['Dirección', 'Velocidad (km/h)']).size().reset_index(name='Frecuencia')
-                wind_rose_data_final = wind_rose_data.groupby(
-                    ['Dirección', 'Velocidad (km/h)']).sum().reset_index()
+                    speed_bins = [0, 5, 10, 15, 20, float('inf')]
+                    speed_labels = ['0-5 km/h', '5-10 km/h',
+                                    '10-15 km/h', '15-20 km/h', '>20 km/h']
+                    dff_wind_binned['Velocidad (km/h)'] = pd.cut(
+                        dff_wind_binned['viento_velocidad'], bins=speed_bins, labels=speed_labels, right=False)
 
-                try:
-                    fig_wind_rose = px.bar_polar(
-                        wind_rose_data_final, r="Frecuencia", theta="Dirección", color="Velocidad (km/h)",
-                        template="plotly_white",
-                        title=f"Rosa de Vientos - {selected_station} ({month_map.get(selected_month_num, "")})",
-                        color_discrete_sequence=px.colors.sequential.YlOrRd,
-                        category_orders={"Dirección": [
-                            'N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']}
-                    )
-                    st.plotly_chart(fig_wind_rose, use_container_width=True)
-                except Exception as e:
-                    st.error(f"Error al generar la Rosa de Vientos: {e}.")
-            else:
-                st.warning(
-                    f"No hay datos suficientes de Viento para '{selected_station}' en {month_map.get(selected_month_num, '')}.")
+                    wind_rose_data = dff_wind_binned.groupby(
+                        ['Dirección', 'Velocidad (km/h)']).size().reset_index(name='Frecuencia')
 
-        # --- Caso por si falta la columna ---
-        else:
-            st.warning(
-                f"No hay datos para la variable '{data_col}' en '{selected_station}' en {month_map.get(selected_month_num, '')}.")
+                    try:
+                        fig_wind_rose = px.bar_polar(
+                            wind_rose_data, r="Frecuencia", theta="Dirección", color="Velocidad (km/h)",
+                            template="plotly_white",
+                            title=f"Rosa de Vientos - {selected_station} ({month_map.get(selected_month_num, "")})",
+                            color_discrete_sequence=px.colors.sequential.YlOrRd,
+                            category_orders={"Dirección": ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']}
+                        )
+                        st.plotly_chart(fig_wind_rose, use_container_width=True)
+                    except Exception as e:
+                        st.error(f"Error al generar la Rosa de Vientos: {e}.")
+                else:
+                    st.warning(
+                        f"No hay datos suficientes de Viento para '{selected_station}' en {month_map.get(selected_month_num, '')}.")
 
     else:
         st.warning(
             "No se pudieron cargar los datos. Verifica que 'datos_limpios.csv' esté en el mismo directorio.")
 
 # -----------------------------------------------
-# SECCIÓN: CHATBOT (¡NUEVO Y FUNCIONAL!)
+# SECCIÓN: CHATBOT
 # -----------------------------------------------
 elif menu == "Chatbot":
     st.title("Asistente Virtual EcoStats 🤖")
@@ -695,7 +588,7 @@ elif menu == "Chatbot":
     if "messages" not in st.session_state:
         st.session_state.messages = [
             {"role": "assistant",
-                "content": "¿Cómo puedo ayudarte a explorar los datos de RACiMo?"}
+             "content": "¿Cómo puedo ayudarte a explorar los datos de RACiMo?"}
         ]
 
     # Mostrar mensajes previos
