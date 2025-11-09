@@ -97,7 +97,6 @@ with st.sidebar:
     options=[
         "Inicio",
         "Mapa de Estaciones",
-        "Animación de Datos",
         "Análisis por Estación",
         "Chatbot",
         "Equipo"
@@ -268,69 +267,6 @@ elif menu == "Mapa de Estaciones":
             "Puedes interactuar con la línea de tiempo y los colores de temperatura directamente en el mapa.")
 
 
-
-
-# -----------------------------------------------
-# SECCIÓN: ANIMACIÓN DE DATOS
-# -----------------------------------------------
-elif menu == "Animación de Datos":
-    st.title("Animación de Datos Ambientales")
-    st.write("Selecciona una variable y presiona 'Play' para ver su evolución en el tiempo sobre el mapa.")
-
-    if df is not None:
-        df_anim = df.copy()
-        df_anim = df_anim.sort_values(by="timestamp")
-        df_anim['fecha_hora_anim'] = df_anim['timestamp'].dt.strftime(
-            '%Y-%m-%d %H:00')
-
-        df_anim_grouped = df_anim.groupby(['estacion', 'latitud', 'longitud', 'fecha_hora_anim']).agg({
-            'temperatura': 'mean',
-            'precipitacion': 'sum',
-            'humedad': 'mean',
-            'pm2_5': 'mean',
-            'ica': 'mean',
-            'presion': 'mean'
-        }).reset_index()
-
-        variables_anim_list = [
-            'temperatura', 'precipitacion', 'humedad', 'pm2_5', 'ica', 'presion']
-        variable_anim_choice = st.selectbox(
-            "Selecciona la variable a animar:",
-            variables_anim_list,
-            index=0
-        )
-
-        st.info("💡 Consejo: Usa el control deslizante de tiempo y el botón de 'Play' en la parte inferior del mapa.")
-
-        fig_anim = px.scatter_mapbox(
-            df_anim_grouped.dropna(
-                subset=[variable_anim_choice, 'latitud', 'longitud']),
-            lat="latitud",
-            lon="longitud",
-            size=variable_anim_choice,
-            color=variable_anim_choice,
-            hover_name="estacion",
-            hover_data={
-                "latitud": False,
-                "longitud": False,
-                "fecha_hora_anim": True,
-                variable_anim_choice: ":.2f"
-            },
-            animation_frame="fecha_hora_anim",
-            color_continuous_scale=px.colors.sequential.YlOrRd,
-            size_max=30,
-            zoom=8,
-            mapbox_style="carto-positron",
-            center={"lat": df_anim_grouped['latitud'].mean(
-            ), "lon": df_anim_grouped['longitud'].mean()},
-            title=f"Animación de '{variable_anim_choice}' a lo largo del tiempo"
-        )
-
-        fig_anim.update_layout(height=600)
-        st.plotly_chart(fig_anim, use_container_width=True)
-
-    else:
-        st.warning("No se pudieron cargar los datos para la animación.")
 
 
 # -----------------------------------------------
@@ -587,110 +523,396 @@ elif menu == "Análisis por Estación":
             "No se pudieron cargar los datos. Verifica que 'datos_limpios.csv' esté en el mismo directorio.")
 
 # -----------------------------------------------
-# SECCIÓN: CHATBOT
+# SECCIÓN: CHATBOT (¡CON LÓGICA CONTEXTUAL Y CORRECTA!)
 # -----------------------------------------------
-# SECCIÓN: CHATBOT
-# -----------------------------------------------
-
 elif menu == "Chatbot":
+    
+    # --- DATOS DE ESTADÍSTICAS GLOBALES PARA EL CHATBOT ---
+    # (Asegúrate de que este diccionario esté definido en la parte superior de tu script)
+    STATION_STATS_DATA = {
+        "Barranca-RacimoOrquidea": {
+            "latitud": 7.068842, "longitud": -73.85138,
+            "stats": {
+                "temperatura": {"max": 36.67, "min": 17.44, "mean": 27.87, "unit": "°C"},
+                "humedad": {"max": 95.40, "min": 45.30, "mean": 77.54, "unit": "%"},
+                "precipitacion": {"max": 30.60, "sum": 655.60, "mean": 0.12, "unit": "mm"},
+                "pm2_5": {"max": 54.47, "min": 0.00, "mean": 9.13, "unit": "µg/m³"},
+                "ica": {"max": 128.49, "min": 0.00, "mean": 28.25, "unit": ""},
+                "viento_velocidad": {"max": 16.35, "min": 0.00, "mean": 3.38, "unit": "km/h"},
+                "presion": {"max": 1019.57, "min": 1003.62, "mean": 1010.60, "unit": "hPa"}
+            }
+        },
+        "Halley UIS": {
+            "latitud": 7.13908, "longitud": -73.12137,
+            "stats": {
+                "temperatura": {"max": 31.17, "min": 22.28, "mean": 26.72, "unit": "°C"},
+                "humedad": {"max": 96.00, "min": 45.00, "mean": 79.36, "unit": "%"},
+                "precipitacion": {"max": 0.80, "sum": 108.60, "mean": 0.02, "unit": "mm"},
+                "pm2_5": {"max": 2.43, "min": 1.45, "mean": 1.94, "unit": "µg/m³"},
+                "ica": {"max": 7.89, "min": 4.71, "mean": 6.30, "unit": ""},
+                "viento_velocidad": {"max": 16.09, "min": 0.00, "mean": 1.96, "unit": "km/h"},
+                "presion": {"max": 1016.49, "min": 1003.42, "mean": 1011.17, "unit": "hPa"}
+            }
+        },
+        "RACIMO-SOCORROCONS4": {
+            "latitud": 6.461252, "longitud": -73.25759,
+            "stats": {
+                "temperatura": {"max": 30.78, "min": 15.72, "mean": 21.59, "unit": "°C"},
+                "humedad": {"max": 96.70, "min": 36.50, "mean": 81.04, "unit": "%"},
+                "precipitacion": {"max": 12.00, "sum": 281.20, "mean": 0.05, "unit": "mm"},
+                "pm2_5": {"max": 322.42, "min": 0.00, "mean": 2.56, "unit": "µg/m³"},
+                "ica": {"max": 372.27, "min": 0.00, "mean": 8.16, "unit": ""},
+                "viento_velocidad": {"max": 11.59, "min": 0.00, "mean": 3.23, "unit": "km/h"},
+                "presion": {"max": 1023.03, "min": 1009.52, "mean": 1017.49, "unit": "hPa"}
+            }
+        },
+        "RACiMo BarbosaAir2.1": {
+            "latitud": 5.92901, "longitud": -73.61547,
+            "stats": {
+                "temperatura": {"max": 31.78, "min": 15.89, "mean": 23.94, "unit": "°C"},
+                "humedad": {"max": 82.00, "min": 29.20, "mean": 61.88, "unit": "%"},
+                "precipitacion": {"max": 0.00, "sum": 0.00, "mean": 0.00, "unit": "mm"},
+                "pm2_5": {"max": 305.55, "min": 0.00, "mean": 13.21, "unit": "µg/m³"},
+                "ica": {"max": 355.56, "min": 0.00, "mean": 36.33, "unit": ""},
+                "viento_velocidad": {"max": 6.47, "min": 0.08, "mean": 3.28, "unit": "km/h"},
+                "presion": {"max": 1049.99, "min": 1016.28, "mean": 1035.37, "unit": "hPa"}
+            }
+        },
+        "RACiMo BarbosaCONS2": {
+            "latitud": 5.949394, "longitud": -73.60563,
+            "stats": {
+                "temperatura": {"max": 30.06, "min": 12.72, "mean": 20.07, "unit": "°C"},
+                "humedad": {"max": 97.30, "min": 31.60, "mean": 80.28, "unit": "%"},
+                "precipitacion": {"max": 9.80, "sum": 385.80, "mean": 0.06, "unit": "mm"},
+                "pm2_5": {"max": 349.67, "min": 0.00, "mean": 5.68, "unit": "µg/m³"},
+                "ica": {"max": 451.16, "min": 0.00, "mean": 16.43, "unit": ""},
+                "viento_velocidad": {"max": 17.14, "min": 0.00, "mean": 2.81, "unit": "km/h"},
+                "presion": {"max": 1025.26, "min": 1013.48, "mean": 1020.40, "unit": "hPa"}
+            }
+        },
+        "RACiMo BarrancaAIR1.1": {
+            "latitud": 7.077814, "longitud": -73.85829,
+            "stats": {
+                "temperatura": {"max": 38.28, "min": 23.50, "mean": 30.36, "unit": "°C"},
+                "humedad": {"max": 96.50, "min": 42.30, "mean": 67.35, "unit": "%"},
+                "precipitacion": {"max": 0.00, "sum": 0.00, "mean": 0.00, "unit": "mm"},
+                "pm2_5": {"max": 357.39, "min": 0.00, "mean": 11.30, "unit": "µg/m³"},
+                "ica": {"max": 402.05, "min": 0.00, "mean": 33.47, "unit": ""},
+                "viento_velocidad": {"max": 8.59, "min": 7.64, "mean": 8.12, "unit": "km/h"},
+                "presion": {"max": 1024.30, "min": 1018.46, "mean": 1021.38, "unit": "hPa"}
+            }
+        },
+        "RACiMo BucGuatiAIR5.1": {
+            "latitud": 6.994449, "longitud": -73.066086,
+            "stats": {
+                "temperatura": {"max": 28.11, "min": 19.00, "mean": 23.43, "unit": "°C"},
+                "humedad": {"max": 92.80, "min": 52.00, "mean": 76.98, "unit": "%"},
+                "precipitacion": {"max": 0.00, "sum": 0.00, "mean": 0.00, "unit": "mm"},
+                "pm2_5": {"max": 128.50, "min": 0.00, "mean": 6.33, "unit": "µg/m³"},
+                "ica": {"max": 187.36, "min": 0.00, "mean": 20.12, "unit": ""},
+                "viento_velocidad": {"max": 7.64, "min": 5.48, "mean": 6.56, "unit": "km/h"},
+                "presion": {"max": 1037.62, "min": 1024.30, "mean": 1030.96, "unit": "hPa"}
+            }
+        },
+        "RACiMo BucSanAIR5": {
+            "latitud": 7.1386485, "longitud": -73.122185,
+            "stats": {
+                "temperatura": {"max": 29.22, "min": 21.94, "mean": 25.38, "unit": "°C"},
+                "humedad": {"max": 82.30, "min": 44.90, "mean": 68.68, "unit": "%"},
+                "precipitacion": {"max": 0.00, "sum": 0.00, "mean": 0.00, "unit": "mm"},
+                "pm2_5": {"max": 62.34, "min": 0.00, "mean": 7.29, "unit": "µg/m³"},
+                "ica": {"max": 143.97, "min": 0.00, "mean": 22.85, "unit": ""},
+                "viento_velocidad": {"max": 5.48, "min": 2.48, "mean": 3.98, "unit": "km/h"},
+                "presion": {"max": 1049.99, "min": 1037.63, "mean": 1044.82, "unit": "hPa"}
+            }
+        },
+        "RACiMo MalagaAIR3.1": {
+            "latitud": 6.698055, "longitud": -72.73542,
+            "stats": {
+                "temperatura": {"max": 26.89, "min": 11.83, "mean": 18.89, "unit": "°C"},
+                "humedad": {"max": 100.00, "min": 33.20, "mean": 70.16, "unit": "%"},
+                "precipitacion": {"max": 0.00, "sum": 0.00, "mean": 0.00, "unit": "mm"},
+                "pm2_5": {"max": 24.54, "min": 0.00, "mean": 2.69, "unit": "µg/m³"},
+                "ica": {"max": 68.79, "min": 0.00, "mean": 8.74, "unit": ""},
+                "viento_velocidad": {"max": 2.48, "min": 0.00, "mean": 1.24, "unit": "km/h"},
+                "presion": {"max": 1043.76, "min": 1028.01, "mean": 1035.88, "unit": "hPa"}
+            }
+        },
+        "RACiMo MalagaCONS3": {
+            "latitud": 6.700839, "longitud": -72.727615,
+            "stats": {
+                "temperatura": {"max": 28.44, "min": 12.17, "mean": 18.07, "unit": "°C"},
+                "humedad": {"max": 96.60, "min": 31.30, "mean": 75.70, "unit": "%"},
+                "precipitacion": {"max": 18.40, "sum": 366.40, "mean": 0.07, "unit": "mm"},
+                "pm2_5": {"max": 58.24, "min": 0.00, "mean": 2.83, "unit": "µg/m³"},
+                "ica": {"max": 135.91, "min": 0.00, "mean": 9.13, "unit": ""},
+                "viento_velocidad": {"max": 13.45, "min": 0.00, "mean": 1.74, "unit": "km/h"},
+                "presion": {"max": 1029.67, "min": 1019.24, "mean": 1024.87, "unit": "hPa"}
+            }
+        },
+        "RACiMo SocConvAir4.1": {
+            "latitud": 6.4681354, "longitud": -73.25675,
+            "stats": {
+                "temperatura": {"max": 30.50, "min": 19.39, "mean": 24.50, "unit": "°C"},
+                "humedad": {"max": 83.70, "min": 34.70, "mean": 66.62, "unit": "%"},
+                "precipitacion": {"max": 0.00, "sum": 0.00, "mean": 0.00, "unit": "mm"},
+                "pm2_5": {"max": 82.66, "min": 0.00, "mean": 4.53, "unit": "µg/m³"},
+                "ica": {"max": 160.90, "min": 0.00, "mean": 14.34, "unit": ""},
+                "viento_velocidad": {"max": 5.66, "min": 5.66, "mean": 5.66, "unit": "km/h"},
+                "presion": {"max": 1023.43, "min": 1023.43, "mean": 1023.43, "unit": "hPa"}
+            }
+        }
+    }
+    
+    # --- LÓGICA DE CHATBOT MEJORADA ---
+    
+    # 1. Mapas de conocimiento del Bot
+    
+    # Aseguramos que la lista esté ordenada para que los números coincidan
+    unique_stations = sorted(list(STATION_STATS_DATA.keys()))
+    station_count = len(unique_stations)
+    
+    # Mapa de Índice de Estaciones (Número -> Nombre)
+    station_index_map = {index + 1: station for index, station in enumerate(unique_stations)}
+    numbered_list_str_stations = "\n".join([f"{i}. {station}" for i, station in station_index_map.items()])
+    
+    # Mapeo de palabras (números) a índice de Estación
+    number_word_map_stations = {
+        'primera': 1, '1ra': 1, '1': 1,
+        'segunda': 2, '2da': 2, '2': 2,
+        'tercera': 3, '3ra': 3, '3': 3,
+        'cuarta': 4, '4ta': 4, '4': 4,
+        'quinta': 5, '5ta': 5, '5': 5,
+        'sexta': 6, '6ta': 6, '6': 6,
+        'séptima': 7, 'septima': 7, '7ma': 7, '7': 7,
+        'octava': 8, '8va': 8, '8': 8,
+        'novena': 9, '9na': 9, '9': 9,
+        'décima': 10, 'decima': 10, '10ma': 10, '10': 10,
+        'onceava': 11, '11va': 11, '11': 11
+    }
+
+    # Mapa de Definiciones de Variables
+    VARIABLE_DESCRIPTIONS = {
+        "pm2_5": "**PM2.5 (µg/m³)**: Son las partículas contaminantes más peligrosas. El gráfico en 'Análisis por Estación' muestra una línea roja en **56 µg/m³**, que es el límite de riesgo.",
+        "temperatura": "**Temperatura (°C)**: Es el grado de calor. El gráfico en 'Análisis por Estación' usa puntos de colores (azul a rojo) para identificar fácilmente picos de calor o frío.",
+        "precipitacion": "**Precipitación (mm)**: Es la cantidad de lluvia. En 'Análisis por Estación', las métricas clave son la **Máxima** (cuánto llovió en 15 min) y la **Total Acumulada** en el mes.",
+        "humedad": "**Humedad (%)**: Afecta la sensación térmica. El gráfico de 'Humedad (Mapa de Calor)' en 'Análisis por Estación' es ideal para ver patrones (ej. '¿A qué hora del día es más húmedo?').",
+        "viento_velocidad": "**Velocidad Viento (km/h)**: Un gráfico de línea que muestra las ráfagas. Lo encuentras en 'Análisis por Estación'.",
+        "viento_direccion": "**Dirección Viento (Rosa)**: Un gráfico polar que muestra la dirección *predominante* (de dónde viene el viento). Lo encuentras en 'Análisis por Estación'.",
+        "presion": "**Presión Barométrica (hPa)**: Una presión baja generalmente indica mal tiempo (tormentas); una presión alta indica buen tiempo estable.",
+        "ica": "**ICA (Índice de Calidad del Aire)**: Es un indicador que te dice qué tan limpio está el aire. El gráfico en 'Análisis por Estación' muestra bandas de colores (🟢, 🟡, 🟠, 🔴) para que veas el nivel de riesgo."
+    }
+    
+    # Mapa de Índice de Variables (Número -> Clave)
+    VARIABLE_INDEX_MAP = {
+        1: "pm2_5",
+        2: "temperatura",
+        3: "precipitacion",
+        4: "humedad",
+        5: "viento_velocidad",
+        6: "viento_direccion",
+        7: "presion",
+        8: "ica"
+    }
+
+    # Lista enumerada de variables para mostrar al usuario
+    numbered_list_str_vars = "\n".join([f"{i}. {VARIABLE_DESCRIPTIONS[key].split(':')[0]}" for i, key in VARIABLE_INDEX_MAP.items()])
+
+    # Mapeo de palabras clave (prompt) a clave de variable
+    VAR_MAP_QUERY = {
+        'pm2.5': 'pm2_5', 'partículas': 'pm2_5', 'contaminación': 'pm2_5',
+        'temperatura': 'temperatura', 'temp': 'temperatura', 'calor': 'temperatura',
+        'humedad': 'humedad',
+        'precipitación': 'precipitacion', 'lluvia': 'precipitacion',
+        'viento': 'viento_velocidad', 'velocidad': 'viento_velocidad',
+        'dirección': 'viento_direccion', 'direccion': 'viento_direccion', 'rosa': 'viento_direccion',
+        'presión': 'presion', 'presion': 'presion',
+        'ica': 'ica', 'calidad del aire': 'ica'
+    }
+    
+    # Mapeo de palabras (números) a índice de Variable
+    number_word_map_vars = {
+        'primera': 1, '1ra': 1, '1': 1,
+        'segunda': 2, '2da': 2, '2': 2,
+        'tercera': 3, '3ra': 3, '3': 3,
+        'cuarta': 4, '4ta': 4, '4': 4,
+        'quinta': 5, '5ta': 5, '5': 5,
+        'sexta': 6, '6ta': 6, '6': 6,
+        'séptima': 7, 'septima': 7, '7ma': 7, '7': 7,
+        'octava': 8, '8va': 8, '8': 8
+    }
+
+    # Mapeo de variables amigables para el Chatbot
+    variable_friendly_map = {
+        "temperatura": "Temperatura", "humedad": "Humedad Relativa", "precipitacion": "Precipitación",
+        "pm2_5": "PM2.5", "viento_velocidad": "Velocidad del Viento", "presion": "Presión Barométrica",
+        "ica": "Índice de Calidad del Aire (ICA)"
+    }
+    
+    # -----------------------------------------------------
+
     st.title("Asistente Virtual EcoStats 🤖")
-    st.write("¡Hola! Soy tu asistente para el Reto 5. ¿En qué te puedo ayudar?")
-
-    # Mostrar robot animado
-    import streamlit.components.v1 as components
-
-    robot_html = """
-    <div style="position:relative; width:150px; height:250px; margin:auto;">
-        <!-- Cabeza -->
-        <div style="width:100px; height:60px; background:#FFC107; border-radius:15px; margin:0 auto; position:relative; top:20px;">
-            <!-- Ojos -->
-            <div style="width:15px; height:15px; background:#000; border-radius:50%; position:absolute; left:20px; top:20px; animation: blink 2s infinite;"></div>
-            <div style="width:15px; height:15px; background:#000; border-radius:50%; position:absolute; right:20px; top:20px; animation: blink 2s infinite;"></div>
-            <!-- Boca -->
-            <div style="width:40px; height:5px; background:#000; border-radius:2px; position:absolute; bottom:10px; left:50%; transform:translateX(-50%);"></div>
-        </div>
-
-        <!-- Cuerpo -->
-        <div style="width:120px; height:120px; background:#FFEB3B; border-radius:20px; margin:10px auto; position:relative;">
-            <!-- Brazos -->
-            <div style="width:20px; height:60px; background:#FFC107; position:absolute; left:-20px; top:30px; border-radius:10px; transform-origin: top center; animation: armMove 1s infinite alternate;"></div>
-            <div style="width:20px; height:60px; background:#FFC107; position:absolute; right:-20px; top:30px; border-radius:10px; transform-origin: top center; animation: armMove 1s infinite alternate-reverse;"></div>
-        </div>
-    </div>
-
-    <style>
-    @keyframes blink {
-      0%, 90%, 100% { transform: scaleY(1); }
-      95% { transform: scaleY(0.1); }
-    }
-    @keyframes armMove {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(30deg); }
-    }
-    </style>
-    """
-
-    components.html(robot_html, height=300)
-
+    
     # Inicializar el historial del chat
     if "messages" not in st.session_state:
         st.session_state.messages = [
             {"role": "assistant",
-             "content": "¿Cómo puedo ayudarte a explorar los datos de RACiMo?"}
+             "content": "👋 ¡Hola! Soy **EcoBot**, tu guía en *EcoStats*. ¿Cómo puedo ayudarte a entender los gráficos?"}
         ]
 
-    # Mostrar mensajes previos
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    # Mostrar historial
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
 
     # Input del usuario
-    if prompt := st.chat_input("Escribe tu pregunta... (ej. 'mapa', 'animación', 'variables')"):
-        # Añadir mensaje del usuario al historial
+    if prompt := st.chat_input("Escribe tu pregunta aquí... (ej. 'temperatura máxima de Halley UIS')"):
         st.session_state.messages.append({"role": "user", "content": prompt})
+        prompt_lower = prompt.lower()
+        
+        # Mostrar mensaje del usuario
         with st.chat_message("user"):
             st.markdown(prompt)
 
         # Generar respuesta del asistente
         with st.chat_message("assistant"):
             response = ""
-            prompt_lower = prompt.lower()
 
-            if "hola" in prompt_lower or "saludos" in prompt_lower:
-                response = "¡Hola! ¿Qué te gustaría saber sobre la app?"
+            # --- DICCIONARIOS DE MAPPING PARA CONSULTAS ---
+            stat_keywords = {'máxima': 'max', 'maxima': 'max', 'mínima': 'min', 'minima': 'min', 'media': 'mean', 'promedio': 'mean', 'total': 'sum', 'sumatoria': 'sum'}
+            
+            found_stat_key = None
+            found_var_key = None
+            found_station = None
+            
+            # 1. Identificar la estadística, variable y estación
+            
+            # Intento 1: Identificar Estación por Nombre
+            for station_name in unique_stations:
+                if station_name.lower() in prompt_lower:
+                    found_station = station_name
+                    break
+            
+            # Intento 2: Identificar Estación por Número (SI LA PALABRA "estación" ESTÁ)
+            if not found_station and ("estación" in prompt_lower or "estacion" in prompt_lower):
+                for word in prompt_lower.split():
+                    if word in number_word_map_stations:
+                        index = number_word_map_stations[word]
+                        if index in station_index_map:
+                            found_station = station_index_map[index]
+                            break
+
+            # Intento 3: Identificar Variable por Nombre
+            for keyword, var_name in VAR_MAP_QUERY.items():
+                if keyword in prompt_lower:
+                    found_var_key = var_name
+                    break
+            
+            # Intento 4: Identificar Variable por Número (SI LA PALABRA "variable" ESTÁ)
+            if not found_var_key and "variable" in prompt_lower:
+                for word in prompt_lower.split():
+                    if word in number_word_map_vars:
+                        index = number_word_map_vars[word]
+                        if index in VARIABLE_INDEX_MAP:
+                            found_var_key = VARIABLE_INDEX_MAP[index]
+                            break
+
+            # Intento 5: Identificar Estadística
+            for keyword, stat_name in stat_keywords.items():
+                if keyword in prompt_lower:
+                    found_stat_key = stat_name.lower()
+                    break
+            
+            # -------------------------------------------------------------------
+            # --- LÓGICA DE RESPUESTAS (Prioridad Inversa) ---
+            # -------------------------------------------------------------------
+            
+            # 1. Saludos y Despedidas
+            if "adios" in prompt_lower or "chao" in prompt_lower or "hasta luego" in prompt_lower:
+                response = "¡Hasta pronto! Que tengas un excelente día. Vuelve cuando quieras explorar más datos. 👋"
+            
+            elif "hola" in prompt_lower or "saludos" in prompt_lower or "buenos dias" in prompt_lower:
+                response = "¡Hola! Soy EcoBot. Es un placer saludarte. ¿Qué te gustaría que te explique sobre el dashboard o los datos de RACiMo?"
+
+            # 2. Lista de Variables
+            elif "cuales son las variables" in prompt_lower or "dime las variables" in prompt_lower or "lista de variables" in prompt_lower:
+                response = f"Analizamos 8 variables principales. Puedes preguntarme por ellas (ej. '¿qué es la variable 1?' o '¿qué es PM2.5?'):\n\n{numbered_list_str_vars}"
+
+            # 3. Lista de Estaciones
+            elif "cuantas estaciones" in prompt_lower or "cuales son las estaciones" in prompt_lower or "lista de estaciones" in prompt_lower or "dime las estaciones" in prompt_lower:
+                response = f"Actualmente monitoreamos **{station_count} estaciones**:\n\n{numbered_list_str_stations}\n\nPuedes preguntarme por el nombre o el número (ej. 'dame las estadísticas de la estación 1')."
+
+            # 4. Ubicación General
+            elif "ubicacion" in prompt_lower or "donde estan" in prompt_lower or "zona de estudio" in prompt_lower:
+                response = "Nuestra zona de estudio principal es el departamento de **Santander, Colombia**. Puedes ver los puntos exactos en la sección **'Mapa de Estaciones'**."
+            
+            # 5. Navegación
             elif "mapa" in prompt_lower and "animado" not in prompt_lower:
                 response = "Puedes ver la ubicación de todas las estaciones en la sección **'Mapa de Estaciones'** en el menú de la izquierda."
-            elif "animación" in prompt_lower or ("mapa" in prompt_lower and "interactivo" in prompt_lower):
-                response = "¡Claro! La sección **'Animación de Datos'** te permite ver las variables animadas en el tiempo sobre un mapa. ¡Es la función estrella del reto!"
-            elif "análisis" in prompt_lower or "gráfico" in prompt_lower or "estación" in prompt_lower:
-                response = "Usa la sección **'Análisis por Estación'** para ver gráficos detallados (series de tiempo, mapas de calor, etc.) de una estación y variable específica."
-            elif "variables" in prompt_lower:
+            elif "animación" in prompt_lower or "evolución" in prompt_lower:
+                response = "La sección **'Animación de Datos'** te permite seleccionar una variable y ver cómo cambian los niveles en todas las estaciones con el tiempo, como un *time-lapse*."
+            elif "análisis" in prompt_lower or "gráfico" in prompt_lower or "sección" in prompt_lower:
                 response = (
-                    "Analizamos variables meteorológicas y de calidad del aire. Las principales son:\n"
-                    "- **Temperatura**\n"
-                    "- **Humedad**\n"
-                    "- **Precipitación**\n"
-                    "- **PM2.5**\n"
-                    "- **ICA** (Índice de Calidad del Aire)\n"
-                    "- **Viento** (velocidad y dirección)\n"
-                    "- **Presión**"
+                    "La sección **'Análisis por Estación'** es para ver gráficos detallados. "
+                    "Recuerda que tienes **tres filtros** arriba (Variable, Estación y Mes) para refinar tu vista."
                 )
-            elif "viento" in prompt_lower:
-                response = "Puedes ver un análisis de la dirección y velocidad del viento en la sección **'Análisis por Estación'** y seleccionando la variable de viento."
-            elif "gracias" in prompt_lower:
-                response = "¡De nada! Estoy aquí para ayudarte a ganar este reto. 😉"
-            else:
+            
+            # 6. Estadística Específica (La consulta más compleja)
+            elif found_stat_key and found_var_key and found_station:
+                station_data = STATION_STATS_DATA[found_station]['stats']
+                
+                if found_var_key == 'precipitacion' and found_stat_key == 'sum':
+                    json_key = 'sum'; stat_name_es = 'Total Acumulada'
+                elif found_var_key == 'precipitacion' and found_stat_key == 'max':
+                    json_key = 'max'; stat_name_es = 'Máxima (15min)'
+                else:
+                    json_key = found_stat_key; stat_name_es = found_stat_key.capitalize()
+
+                try:
+                    value = station_data[found_var_key][json_key]
+                    unit = station_data[found_var_key]['unit']
+                    response = (
+                        f"La estadística **{stat_name_es} de {variable_friendly_map.get(found_var_key, found_var_key.capitalize())}** "
+                        f"registrada en la estación **{found_station}** es de: **{value:.2f} {unit}**."
+                    )
+                except KeyError:
+                     response = f"No pude encontrar el valor '{stat_name_es}' para la variable '{found_var_key.capitalize()}' en esa estación."
+            
+            # 7. Estadística General de Estación (Por nombre o número)
+            elif found_station and ("estadísticas" in prompt_lower or "datos de" in prompt_lower or "háblame de" in prompt_lower or "información de" in prompt_lower):
+                
+                station_data = STATION_STATS_DATA[found_station]
+                stats = station_data['stats']
+                
+                response = f"Aquí están las estadísticas resumidas para la estación **{found_station}**:\n\n"
+                response += f"**Ubicación:** Lat: {station_data['latitud']:.6f}, Lon: {station_data['longitud']:.6f}\n\n"
+                
+                stat_output = []
+                for var_key, stats_dict in stats.items():
+                    var_name = variable_friendly_map.get(var_key, var_key.capitalize())
+                    unit = stats_dict['unit']
+                    
+                    if var_key == 'precipitacion':
+                        stat_output.append(f"**{var_name}:** Total {stats_dict['sum']:.2f} {unit}, Máx (15min) {stats_dict['max']:.2f} {unit}.")
+                    else:
+                        stat_output.append(f"**{var_name} ({unit}):** Máx {stats_dict['max']:.2f}, Mín {stats_dict['min']:.2f}, Media {stats_dict['mean']:.2f}.")
+                
+                response += "\n\n".join(stat_output)
+
+            # 8. Definición de Variable (Por nombre o número)
+            elif found_var_key and ("qué es" in prompt_lower or "explicame" in prompt_lower or "háblame de" in prompt_lower or "definición" in prompt_lower or "variable" in prompt_lower):
+                 response = VARIABLE_DESCRIPTIONS.get(found_var_key, "Lo siento, no tengo una descripción para esa variable específica.")
+            
+            # --- LÓGICA DE FALLO ---
+            elif not response: 
                 response = (
-                    "No estoy seguro de cómo responder a eso. Intenta preguntarme sobre:\n"
-                    "- 'mapa'\n"
-                    "- 'animación'\n"
-                    "- 'análisis por estación'\n"
-                    "- 'variables'"
+                    "No estoy seguro de cómo responder a eso. Intenta preguntar por una **variable** ('PM2.5', 'variable 1'), una **sección** ('mapa', 'animación'), o una **estadística específica** (ej. 'máxima temperatura en Halley UIS')."
                 )
 
-            st.markdown(response)
-            st.session_state.messages.append(
-                {"role": "assistant", "content": response})
+            st.session_state.messages.append({"role": "assistant", "content": response})
+            with st.chat_message("assistant"):
+                st.markdown(f"🌿 **EcoBot:** {response}")
+
 
 # -----------------------------------------------
 # SECCIÓN: EQUIPO (Tu código)
