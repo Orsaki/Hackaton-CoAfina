@@ -655,14 +655,14 @@ elif menu == "Análisis por Estación":
 
 
 
+
 # -----------------------------------------------
-# SECCIÓN: CHATBOT (¡CON LÓGICA CONTEXTUAL Y CORRECTA!)
+# SECCIÓN: CHATBOT (¡CON LÓGICA DE BOTONES Y GUÍA ACTUALIZADA!)
 # -----------------------------------------------
 elif menu == "Chatbot":
     st.title("Asistente Virtual EcoStats 🤖")
     
     # --- DATOS DE ESTADÍSTICAS GLOBALES PARA EL CHATBOT ---
-    # (Asegúrate de que este diccionario esté definido en la parte superior de tu script)
     STATION_STATS_DATA = {
         "Barranca-RacimoOrquidea": {
             "latitud": 7.068842, "longitud": -73.85138,
@@ -885,8 +885,6 @@ elif menu == "Chatbot":
     
     # -----------------------------------------------------
 
-    st.title("Asistente Virtual EcoStats 🤖")
-    
     # Inicializar el estado del chat
     if "chat_stage" not in st.session_state:
         st.session_state.chat_stage = "inicio"
@@ -912,7 +910,7 @@ elif menu == "Chatbot":
     # ESTADO INICIAL: Mostrar opciones principales
     if st.session_state.chat_stage == "inicio":
         st.write("---") # Separador visual
-        cols = st.columns(4) # <-- ¡Añadida una cuarta columna!
+        cols = st.columns(4) 
         cols[0].button("¿Cómo navegar? 🧭", on_click=handle_option, args=["navegacion"], use_container_width=True)
         cols[1].button("Entender las Variables 📚", on_click=handle_option, args=["variables"], use_container_width=True)
         cols[2].button("Info de Estaciones 📡", on_click=handle_option, args=["estaciones"], use_container_width=True)
@@ -923,7 +921,7 @@ elif menu == "Chatbot":
         with st.chat_message("assistant"):
             response_nav = (
                 "¡Claro! Aquí tienes una guía rápida de la aplicación:\n\n"
-                "Puedes ver el menú principal en la **barra lateral izquierda** (si estás en un computador) o tocando el ícono **>** (si estás en un celular).\n\n"
+                "Puedes ver el menú principal en la **barra lateral izquierda**.\n\n"
                 "- **Inicio:** Es la portada con la bienvenida y la descripción de las variables.\n"
                 "- **Mapa de Estaciones:** Muestra la ubicación geográfica de todos los sensores RACiMo en un mapa interactivo con un índice numérico.\n"
                 "- **Análisis por Estación:** ¡La sección más importante! Aquí puedes:\n"
@@ -941,7 +939,7 @@ elif menu == "Chatbot":
     # ESTADO 1: El usuario quiere entender las variables
     elif st.session_state.chat_stage == "variables":
         with st.chat_message("assistant"):
-            st.markdown("¡Genial! Estas son las variables que analizamos. Haz clic en una para saber qué significa:")
+            st.markdown(f"¡Genial! Estas son las {len(VARIABLE_INDEX_MAP)} variables que analizamos. Haz clic en una para saber qué significa:")
         
         # Crear botones para cada variable
         var_cols = st.columns(4)
@@ -957,8 +955,8 @@ elif menu == "Chatbot":
 
     # ESTADO 2: El usuario quiere info de estaciones
     elif st.session_state.chat_stage == "estaciones":
+        response_est = f"Actualmente monitoreamos **{station_count} estaciones** de la red RACiMo en Santander.\n\n{numbered_list_str_stations}\n\n---\n¿Te gustaría ver un resumen de las estadísticas (Máx/Mín/Media) de todas estas estaciones?"
         with st.chat_message("assistant"):
-            response_est = f"Actualmente monitoreamos **{station_count} estaciones** de la red RACiMo en Santander.\n\n{numbered_list_str_stations}\n\n---\n¿Te gustaría ver un resumen de las estadísticas (Máx/Mín/Media) de todas estas estaciones?"
             st.markdown(response_est)
             st.session_state.messages.append({"role": "assistant", "content": response_est})
         
@@ -1023,7 +1021,6 @@ elif menu == "Chatbot":
         else:
             st.session_state.chat_stage = "inicio"
             st.experimental_rerun() # Forzamos recargar para mostrar el menú inicial
-
 
 # -------------------------------------------------
 # SECCIÓN: EQUIPO (centrado y totalmente funcional)
