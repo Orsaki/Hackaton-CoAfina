@@ -1,14 +1,14 @@
 # Archivo: .streamlit/config.toml
 [theme]
 
-# Color primario (botones, sliders, widgets) - Un verde menta
-primaryColor="#1ABC9C"
+# Color primario (botones, sliders, widgets) - Un amarillo/ámbar vibrante
+primaryColor="#F39C12"
 
-# Color de fondo principal - Un gris/verde muy oscuro
-backgroundColor="#1F2937"
+# Color de fondo principal - Negro
+backgroundColor="#0E1117"
 
 # Color de fondo para elementos como la barra lateral
-secondaryBackgroundColor="#37475A"
+secondaryBackgroundColor="#1C2833"
 
 # Color del texto principal
 textColor="#FFFFFF"
