@@ -985,9 +985,10 @@ elif menu == "Equipo":
 
 
     <div class="team-container">
-        <div class="member-card"><div class="emoji">🧑‍💻</div><div class="member-name">Daniel Ormeño Sakihama</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/Orsaki" target="_blank">aquí</a></div><div>💻</div></div>
+        <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Daniel Ormeño</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/Orsaki" target="_blank">aquí</a></div><div>💻</div></div>
         <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Brisa Paredes</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/BrisaParedes" target="_blank">aquí</a></div><div>💻</div></div>
         <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Pamela Lázaro</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/lazaropamela" target="_blank">aquí</a></div><div>💻</div></div>
-        <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Fátima Montes Yato</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/FatimaMY" target="_blank">aquí</a></div><div>💻</div></div>
+        <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Fátima Montes</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/FatimaMY" target="_blank">aquí</a></div><div>💻</div></div>
     </div>
     """, unsafe_allow_html=True)
+
