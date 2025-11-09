@@ -983,5 +983,5 @@ elif menu == "Equipo":
 
 
     <div class="team-container">
-</div>
+    </div>
     """)
