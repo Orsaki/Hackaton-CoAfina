@@ -332,7 +332,7 @@ elif menu == "Mapa de Estaciones":
     <div style='text-align: center; background-color: white; color: black; padding: 25px; border-radius: 12px; width: 100%;'>
         <h3 style='text-align: center; font-weight: bold;'>Sobre los tipos de estaciones y sus mediciones</h3>
         <p style='font-size: 17px; margin: 0 auto; max-width: 900px; line-height: 1.5;'>
-        Dentro de la red RACiMo contamos con diferentes tipos de estaciones, cada una diseñada para registrar información específica sobre el ambiente. 
+        Dentro de la red RACiMo se cuenta con diferentes tipos de estaciones, cada una diseñada para registrar información específica sobre el ambiente. 
         Las estaciones <b>Airlink (AIR)</b> registran la temperatura, la humedad y los niveles de material particulado (PM2.5). 
         Las estaciones <b>Vantage Vue (VUE)</b> miden temperatura, humedad, presión atmosférica, velocidad y dirección del viento, y además cada una está conectada con una estación Airlink. 
         Por último, la <b>Vantage Pro2</b> ofrece un monitoreo meteorológico más completo, con mediciones de viento y presión de alta precisión. 
