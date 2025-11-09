@@ -251,9 +251,15 @@ if menu == "Inicio":
 
 # SECCIÓN: MAPA DE ESTACIONES (usando Kepler.gl publicado en GitHub Pages)
 # ----------------------------------------------------------
+# SECCIÓN: MAPA DE ESTACIONES
+
+# -----------------------------------------------
+# -----------------------------------------------
+# SECCIÓN: MAPA DE ESTACIONES (usando Kepler.gl publicado en GitHub Pages)
+# -----------------------------------------------
 elif menu == "Mapa de Estaciones":
     st.title("Mapa Interactivo de Estaciones")
-    st.write("Visualiza las estaciones y temperaturas en el mapa interactivo Kepler.gl publicado en GitHub Pages.")
+    st.write("Explora las estaciones activas y observa cómo cambian las temperaturas y condiciones en tiempo real a través del mapa interactivo.")
 
     # URL pública de tu mapa en GitHub Pages
     kepler_url = "https://orsaki.github.io/Hackaton-CoAfina/"
@@ -261,8 +267,135 @@ elif menu == "Mapa de Estaciones":
     # Insertar el mapa en un iframe dentro de Streamlit
     st.components.v1.iframe(kepler_url, height=700, scrolling=True)
 
-    st.info("Este mapa se genera en Kepler.gl y está alojado en GitHub Pages. "
-            "Puedes interactuar con la línea de tiempo y los colores de temperatura directamente en el mapa.")
+    st.info("Este mapa ha sido elaborado con Kepler.gl y publicado en GitHub Pages. "
+            "Puedes acercarte, moverte por el mapa y observar cada estación.")
+
+    # ----------------------------------------------------------
+    # TABLERO DE ESTACIONES CON ENLACES
+    # ----------------------------------------------------------
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #000;'>🌎 ¿Te gustaría conocer los datos en vivo de cada estación?</h2>", unsafe_allow_html=True)
+
+    estaciones = {
+        "Barranca - Racimo Orquídea": "https://www.weatherlink.com/bulletin/a802f429-f29b-447f-ba13-a312386571e7",
+        "Halley UIS": "https://www.weatherlink.com/bulletin/0ce364bd-acae-4bd0-92d4-f9a998a21a61",
+        "RACiMo - Socorro CONS4": "https://www.weatherlink.com/bulletin/1e67f9ec-96da-48be-816c-e56af49b28a0",
+        "RACiMo - Barbosa Air2.1": "https://www.weatherlink.com/bulletin/88abfff2-2f29-423a-978d-62514f799ff3",
+        "RACiMo - Barbosa CONS2": "https://www.weatherlink.com/bulletin/6d53fbb4-321a-4e4c-91f8-2384ddd5ea2d",
+        "RACiMo - Bucaramanga San AIR5": "https://www.weatherlink.com/bulletin/930ccf8f-d05f-4dd4-be28-d50d99078065",
+        "RACiMo - Málaga AIR3.1": "https://www.weatherlink.com/bulletin/9e3826b4-1dfc-437b-b37f-bc09e5cf6e9b",
+        "RACiMo - Málaga CONS3": "https://www.weatherlink.com/bulletin/cd65618a-540a-4b4b-858d-8df2ab30406c",
+        "RACiMo - Socorro Conv AIR4.1": "https://www.weatherlink.com/bulletin/e024efe8-b546-4f05-b3b8-04ffef19e8d8"
+    }
+
+    # Crear diseño en dos columnas
+    col1, col2 = st.columns(2)
+    estaciones_items = list(estaciones.items())
+
+    # Mostrar 2 por fila
+    for i in range(0, len(estaciones_items), 2):
+        with col1:
+            if i < len(estaciones_items):
+                nombre, url = estaciones_items[i]
+                st.markdown(
+                    f"""
+                    <div style="background-color:#F5F7F2; color:black; border-radius:12px; padding:15px; 
+                                margin-bottom:10px; text-align:center; font-size:18px;">
+                        <b>{nombre}</b><br>
+                        Consulta sus datos en tiempo real dando clic 
+                        <a href="{url}" target="_blank" style="font-weight:bold; color:#007b55;">aquí</a>.
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+        with col2:
+            if i + 1 < len(estaciones_items):
+                nombre, url = estaciones_items[i + 1]
+                st.markdown(
+                    f"""
+                    <div style="background-color:#F5F7F2; color:black; border-radius:12px; padding:15px; 
+                                margin-bottom:10px; text-align:center; font-size:18px;">
+                        <b>{nombre}</b><br>
+                        Consulta sus datos en tiempo real dando clic 
+                        <a href="{url}" target="_blank" style="font-weight:bold; color:#007b55;">aquí</a>.
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+    # ----------------------------------------------------------
+    
+
+    # ----------------------------------------------------------
+    st.markdown("""
+    <div style='text-align: center; background-color: white; color: black; padding: 25px; border-radius: 12px; width: 100%;'>
+        <h3 style='text-align: center; font-weight: bold;'>Sobre los tipos de estaciones y sus mediciones</h3>
+        <p style='font-size: 17px; margin: 0 auto; max-width: 900px; line-height: 1.5;'>
+        Dentro de la red RACiMo contamos con diferentes tipos de estaciones, cada una diseñada para registrar información específica sobre el ambiente. 
+        Las estaciones <b>Airlink (AIR)</b> registran la temperatura, la humedad y los niveles de material particulado (PM2.5). 
+        Las estaciones <b>Vantage Vue (VUE)</b> miden temperatura, humedad, presión atmosférica, velocidad y dirección del viento, y además cada una está conectada con una estación Airlink. 
+        Por último, la <b>Vantage Pro2</b> ofrece un monitoreo meteorológico más completo, con mediciones de viento y presión de alta precisión. 
+        A continuación puedes ver qué variables se encuentran disponibles para cada estación en la siguiente tabla.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+    # ----------------------------------------------------------
+    # TABLA DE VARIABLES POR ESTACIÓN
+    # ----------------------------------------------------------
+    st.markdown("""
+    <style>
+        .tabla-estaciones {
+            background-color: #F5F7F2;
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            margin-top: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .tabla-estaciones th, .tabla-estaciones td {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            color: black;
+            font-size: 16px;
+        }
+        .tabla-estaciones th {
+            font-weight: bold;
+            background-color: #E7F2E5;
+        }
+        .tabla-estaciones tr:hover {
+            background-color: #e9f0eb;
+        }
+    </style>
+
+    <table class='tabla-estaciones'>
+        <tr>
+            <th>Estación</th>
+            <th>PM2.5</th>
+            <th>Temperatura</th>
+            <th>Precipitación</th>
+            <th>Humedad</th>
+            <th>Velocidad del Viento</th>
+            <th>Dirección del Viento</th>
+            <th>Presión Barométrica</th>
+        </tr>
+        <tr><td>Barranca – Racimo Orquídea (AIR)</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+        <tr><td>Halley UIS (VUE)</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td>RACiMo – Socorro CONS4 (VUE)</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td>RACiMo – Barbosa Air2.1 (AIR)</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+        <tr><td>RACiMo – Barbosa CONS2 (VUE)</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td>RACiMo – Bucaramanga San AIR5 (AIR)</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+        <tr><td>RACiMo – Bucaramanga Guatiguará AIR5.1 (AIR)</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+        <tr><td>RACiMo – Málaga AIR3.1 (AIR)</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+        <tr><td>RACiMo – Málaga CONS3 (VUE)</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+        <tr><td>RACiMo – Socorro Conv AIR4.1 (AIR)</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+        <tr><td>RACiMo – Barranca AIR1.1 (AIR)</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+    </table>
+    """, unsafe_allow_html=True)
+
 
 
 
@@ -984,4 +1117,5 @@ elif menu == "Equipo":
 
     <div class="team-container">
     </div>
+
     """)
