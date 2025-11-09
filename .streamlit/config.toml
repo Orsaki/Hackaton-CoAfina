@@ -1,9 +1,18 @@
-[theme]
-primaryColor = "#ff6f61"
-backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f0f0f0"
-textColor = "black"
-font = "sans serif"
+# Archivo: .streamlit/config.toml
 
-[server]
-enableStaticServing = true
+[theme]
+
+# Color primario (botones, sliders, widgets) - Un azul vibrante
+primaryColor="#00A0FF"
+
+# Color de fondo principal - Un azul muy oscuro (casi negro)
+backgroundColor="#0A1828"
+
+# Color de fondo para elementos como la barra lateral y selectores
+secondaryBackgroundColor="#172C41"
+
+# Color del texto principal (sobre el fondo oscuro)
+textColor="#FFFFFF"
+
+# Color de las fuentes (ej. Garamond, serif)
+font="sans serif"
