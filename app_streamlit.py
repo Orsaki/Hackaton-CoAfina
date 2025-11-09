@@ -180,7 +180,7 @@ if menu == "Inicio":
         unsafe_allow_html=True
     )
 
-    st.markdown("<h2 style='color:#FFFFFF; text-align:center; margin-top:40px;'>🌦️ Variables que podrás explorar:</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color:#2E8B57; text-align:center; margin-top:40px;'>🌦️ Variables que podrás explorar:</h2>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
 
     with col1:
@@ -240,7 +240,7 @@ if menu == "Inicio":
     <h3 style="text-align:center; color:#2E8B57 ; font-size:24px;">
         🌍 Entender los datos ambientales nos ayuda a actuar: plantar árboles, reducir la contaminación y adaptarnos al cambio climático.
     </h3>
-    <p style="text-align:center; font-size:18px; color:#EAEAEA;">
+    <p style="text-align:center; font-size:18px; color:#2E8B57;">
         <b>¡Cada dato cuenta para cuidar nuestro planeta! 🌎</b>
     </p>
     """, unsafe_allow_html=True)
