@@ -259,7 +259,7 @@ if menu == "Inicio":
 # -----------------------------------------------
 elif menu == "Mapa de Estaciones":
     st.title("Mapa Interactivo de Estaciones")
-    st.write("Explora las estaciones activas y observa cómo cambian las temperaturas y condiciones en tiempo real a través del mapa interactivo.")
+    st.write("Explora las estaciones activas y observa las 11 estaciones a través del mapa interactivo.")
 
     # URL pública de tu mapa en GitHub Pages
     kepler_url = "https://orsaki.github.io/Hackaton-CoAfina/"
@@ -1119,3 +1119,4 @@ elif menu == "Equipo":
     </div>
 
     """)
+
