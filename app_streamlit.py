@@ -902,31 +902,11 @@ elif menu == "Chatbot":
     # --- LÓGICA DE CHATBOT MEJORADA ---
     
     # 1. Mapas de conocimiento del Bot
-    
-    # Aseguramos que la lista esté ordenada para que los números coincidan
     unique_stations = sorted(list(STATION_STATS_DATA.keys()))
     station_count = len(unique_stations)
-    
-    # Mapa de Índice de Estaciones (Número -> Nombre)
     station_index_map = {index + 1: station for index, station in enumerate(unique_stations)}
     numbered_list_str_stations = "\n".join([f"{i}. {station}" for i, station in station_index_map.items()])
-    
-    # Mapeo de palabras (números) a índice de Estación
-    number_word_map_stations = {
-        'primera': 1, '1ra': 1, '1': 1,
-        'segunda': 2, '2da': 2, '2': 2,
-        'tercera': 3, '3ra': 3, '3': 3,
-        'cuarta': 4, '4ta': 4, '4': 4,
-        'quinta': 5, '5ta': 5, '5': 5,
-        'sexta': 6, '6ta': 6, '6': 6,
-        'séptima': 7, 'septima': 7, '7ma': 7, '7': 7,
-        'octava': 8, '8va': 8, '8': 8,
-        'novena': 9, '9na': 9, '9': 9,
-        'décima': 10, 'decima': 10, '10ma': 10, '10': 10,
-        'onceava': 11, '11va': 11, '11': 11
-    }
 
-    # Mapa de Definiciones de Variables
     VARIABLE_DESCRIPTIONS = {
         "pm2_5": "**PM2.5 (µg/m³)**: Son las partículas contaminantes más peligrosas. El gráfico en 'Análisis por Estación' muestra una línea roja en **56 µg/m³**, que es el límite de riesgo.",
         "temperatura": "**Temperatura (°C)**: Es el grado de calor. El gráfico en 'Análisis por Estación' usa puntos de colores (azul a rojo) para identificar fácilmente picos de calor o frío.",
@@ -938,7 +918,6 @@ elif menu == "Chatbot":
         "ica": "**ICA (Índice de Calidad del Aire)**: Es un indicador que te dice qué tan limpio está el aire. El gráfico en 'Análisis por Estación' muestra bandas de colores (🟢, 🟡, 🟠, 🔴) para que veas el nivel de riesgo."
     }
     
-    # --- ¡NUEVO! Guía de Gráficos ---
     CHART_DESCRIPTIONS = {
         "grafico_linea": {
             "title": "📈 Gráfico de Línea (Series de Tiempo)",
@@ -1013,46 +992,11 @@ elif menu == "Chatbot":
         }
     }
     
-    # Mapa de Índice de Variables (Número -> Clave)
     VARIABLE_INDEX_MAP = {
-        1: "pm2_5",
-        2: "temperatura",
-        3: "precipitacion",
-        4: "humedad",
-        5: "viento_velocidad",
-        6: "viento_direccion",
-        7: "presion",
-        8: "ica"
-    }
-
-    # Lista enumerada de variables para mostrar al usuario
-    numbered_list_str_vars = "\n".join([f"{i}. {VARIABLE_DESCRIPTIONS[key].split(':')[0]}" for i, key in VARIABLE_INDEX_MAP.items()])
-
-    # Mapeo de palabras clave (prompt) a clave de variable
-    VAR_MAP_QUERY = {
-        'pm2.5': 'pm2_5', 'partículas': 'pm2_5', 'contaminación': 'pm2_5',
-        'temperatura': 'temperatura', 'temp': 'temperatura', 'calor': 'temperatura',
-        'humedad': 'humedad',
-        'precipitación': 'precipitacion', 'lluvia': 'precipitacion',
-        'viento': 'viento_velocidad', 'velocidad': 'viento_velocidad',
-        'dirección': 'viento_direccion', 'direccion': 'viento_direccion', 'rosa': 'viento_direccion',
-        'presión': 'presion', 'presion': 'presion',
-        'ica': 'ica', 'calidad del aire': 'ica'
+        1: "pm2_5", 2: "temperatura", 3: "precipitacion", 4: "humedad",
+        5: "viento_velocidad", 6: "viento_direccion", 7: "presion", 8: "ica"
     }
     
-    # Mapeo de palabras (números) a índice de Variable
-    number_word_map_vars = {
-        'primera': 1, '1ra': 1, '1': 1,
-        'segunda': 2, '2da': 2, '2': 2,
-        'tercera': 3, '3ra': 3, '3': 3,
-        'cuarta': 4, '4ta': 4, '4': 4,
-        'quinta': 5, '5ta': 5, '5': 5,
-        'sexta': 6, '6ta': 6, '6': 6,
-        'séptima': 7, 'septima': 7, '7ma': 7, '7': 7,
-        'octava': 8, '8va': 8, '8': 8
-    }
-
-    # Mapeo de variables amigables para el Chatbot
     variable_friendly_map = {
         "temperatura": "Temperatura", "humedad": "Humedad Relativa", "precipitacion": "Precipitación",
         "pm2_5": "PM2.5", "viento_velocidad": "Velocidad del Viento", "presion": "Presión Barométrica",
@@ -1071,25 +1015,24 @@ elif menu == "Chatbot":
              "content": "¡Hola! Soy EcoBot. ¿En qué te puedo ayudar hoy? 😊"}
         ]
 
+    # --- LÓGICA DE BOTONES ---
+    
+    # Esta función maneja el clic del botón Y recarga la página
+    def handle_rerun(option):
+        st.session_state.chat_stage = option
+        # Añade la respuesta del *usuario* (el clic) al historial
+        st.session_state.messages.append({"role": "user", "content": option})
+        st.rerun() # Recarga la página para mostrar el nuevo estado
+
+    # Esta función solo añade la respuesta del *asistente* al historial (si no está duplicada)
+    def add_assistant_response(response_content):
+        if st.session_state.messages[-1]["role"] == "user":
+            st.session_state.messages.append({"role": "assistant", "content": response_content})
+
     # Mostrar mensajes previos
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
-
-    # --- LÓGICA DE BOTONES ---
-    
-    # Variable para controlar si se debe recargar
-    needs_rerun = False
-
-    def handle_option(option):
-        # Esta función ahora solo cambia el estado y añade el mensaje
-        st.session_state.chat_stage = option
-        st.session_state.messages.append({"role": "user", "content": option})
-
-    def handle_rerun(option):
-        # Esta función se usa para los botones que SÍ necesitan recargar
-        handle_option(option)
-        st.rerun() # Usamos rerun()
 
     # ESTADO INICIAL: Mostrar opciones principales
     if st.session_state.chat_stage == "inicio":
@@ -1123,7 +1066,7 @@ elif menu == "Chatbot":
                 "- **Equipo:** Conoce a los creadores de este dashboard."
             )
             st.markdown(response_nav)
-            st.session_state.messages.append({"role": "assistant", "content": response_nav})
+            add_assistant_response(response_nav) # Añade la respuesta al historial (solo una vez)
         if st.button("← Volver al menú"):
             handle_rerun("inicio")
 
@@ -1131,6 +1074,7 @@ elif menu == "Chatbot":
     elif st.session_state.chat_stage == "graficos":
         with st.chat_message("assistant"):
             st.markdown("¡Perfecto! Estos son los tipos de gráficos que usamos en la sección 'Análisis por Estación'. Haz clic en uno para saber cómo leerlo:")
+            add_assistant_response("Mostrando guía de gráficos...") # Mensaje simple para el log
         
         g_cols = st.columns(5)
         if g_cols[0].button("Gráfico de Línea", use_container_width=True):
@@ -1151,6 +1095,7 @@ elif menu == "Chatbot":
     elif st.session_state.chat_stage == "variables":
         with st.chat_message("assistant"):
             st.markdown(f"¡Genial! Estas son las {len(VARIABLE_INDEX_MAP)} variables que analizamos. Haz clic en una para saber qué significa:")
+            add_assistant_response("Mostrando guía de variables...") # Mensaje simple para el log
         
         var_cols = st.columns(4)
         var_keys = list(VARIABLE_INDEX_MAP.values())
@@ -1168,7 +1113,7 @@ elif menu == "Chatbot":
         response_est = f"Actualmente monitoreamos **{station_count} estaciones** de la red RACiMo en Santander.\n\n{numbered_list_str_stations}\n\n---\n¿Te gustaría ver un resumen de las estadísticas (Máx/Mín/Media) de todas estas estaciones?"
         with st.chat_message("assistant"):
             st.markdown(response_est)
-            st.session_state.messages.append({"role": "assistant", "content": response_est})
+            add_assistant_response(response_est)
         
         cols_est = st.columns(3)
         if cols_est[0].button("Sí, mostrar estadísticas", use_container_width=True):
@@ -1188,9 +1133,9 @@ elif menu == "Chatbot":
         )
         with st.chat_message("assistant"):
             st.markdown(response_racimo)
+            add_assistant_response(response_racimo)
         if st.button("← Volver al menú"):
             handle_rerun("inicio")
-        st.session_state.messages.append({"role": "assistant", "content": response_racimo})
 
     # ESTADO: Mostrar estadísticas de TODAS las estaciones
     elif st.session_state.chat_stage == "stats_si":
@@ -1216,7 +1161,7 @@ elif menu == "Chatbot":
                     st.markdown("\n\n".join(stat_output))
                     st.markdown("---")
             
-            st.session_state.messages.append({"role": "assistant", "content": "*(Se mostró el resumen estadístico)*"})
+            add_assistant_response("*(Se mostró el resumen estadístico)*")
                     
         if st.button("← Volver al menú"):
             handle_rerun("inicio")
@@ -1226,9 +1171,9 @@ elif menu == "Chatbot":
         response_var = VARIABLE_DESCRIPTIONS[st.session_state.chat_stage]
         with st.chat_message("assistant"):
             st.markdown(response_var)
+            add_assistant_response(response_var)
         if st.button("← Volver a Variables"):
             handle_rerun("variables")
-        st.session_state.messages.append({"role": "assistant", "content": response_var})
         
     # --- ¡NUEVO! ESTADOS DINÁMICOS: Mostrar definición de tipo de gráfico ---
     elif st.session_state.chat_stage in CHART_DESCRIPTIONS:
@@ -1276,18 +1221,19 @@ elif menu == "Chatbot":
             
         if st.button("← Volver a Gráficos"):
             handle_rerun("graficos")
-        # Asegurarse de que la respuesta (con gráfico) se registre, aunque sea solo el texto
-        st.session_state.messages.append({"role": "assistant", "content": f"{chart_data['title']}\n{chart_data['description']}"})
+        add_assistant_response(f"{chart_data['title']}\n{chart_data['description']}")
     
     # Si no, volvemos al inicio (estado por defecto)
     else:
-        st.session_state.chat_stage = "inicio"
-        needs_rerun = True # Forzamos recargar para mostrar el menú inicial
+        # Esta es la lógica de "fallback". Si el estado es desconocido,
+        # o si es un estado que no tiene botones (como "inicio"),
+        # no hacemos nada y dejamos que los botones de "inicio" se muestren.
+        if st.session_state.chat_stage != "inicio":
+             st.session_state.chat_stage = "inicio"
+             st.rerun()
 
-    # --- CORRECCIÓN: Ejecutar rerun() al final de la lógica de botones ---
-    if needs_rerun:
-        st.rerun()
-
+    # Si se usó st.chat_input, el script se recarga automáticamente.
+    # Si se usó un st.button con handle_rerun, ya se recargó.
 # -------------------------------------------------
 # SECCIÓN: EQUIPO (centrado y totalmente funcional)
 # -----------------------------------------------
