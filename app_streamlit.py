@@ -958,7 +958,7 @@ elif menu == "Equipo":
             font-size: 20px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: #DDE6D5 ;
+            color: #fcfafa ;
         }
         .member-link {
             margin-top: 10px;
@@ -966,12 +966,12 @@ elif menu == "Equipo":
         }
         .member-link a {
             text-decoration: none;
-            color: #CC878B;
+            color: #DDE6D5 ;
             font-weight: bold;
             transition: color 0.3s ease;
         }
         .member-link a:hover {
-            color: #5E0C15;
+            color: #DDE6D5 ;
         }
         .emoji {
             font-size: 22px;
@@ -979,7 +979,7 @@ elif menu == "Equipo":
         }
     </style>
 
-    <p style="color: #5E0C15; font-size: 28px; text-align: center; line-height: 1.6;"> Somos el grupo detrás de <b>EcoStats</b>, comprometidos con transformar datos ambientales en conocimiento para todos. 🌱</p>
+    <p style="color: #2E8B57; font-size: 28px; text-align: center; line-height: 1.6;"> Somos el grupo detrás de <b>EcoStats</b>, comprometidos con transformar datos ambientales en conocimiento para todos. 🌱</p>
 
 
     <div class="team-container">
