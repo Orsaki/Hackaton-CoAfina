@@ -112,7 +112,7 @@ with st.sidebar:
 # SECCIÓN: INICIO (Tus "Datos teóricos")
 # -----------------------------
 if menu == "Inicio":
-    st.markdown("<h1>🌎 <span style='color:#FFF176;'>EcoStats</span></h1>", unsafe_allow_html=True)
+    st.markdown("<h1>🌎 <span style='color:#2E8B57 ;'>EcoStats</span></h1>", unsafe_allow_html=True)
     st.markdown(
         """
         <style>
@@ -130,7 +130,7 @@ if menu == "Inicio":
 
         <h2 style="
             text-align: center;
-            color: #FFF9C4;
+            color: #2E8B57 ;
             font-size: 32px;
             font-family: 'Trebuchet MS', sans-serif;
             margin-top: 30px;
@@ -155,11 +155,11 @@ if menu == "Inicio":
             letter-spacing: 3px;
             margin-top: 0;
         ">
-            🌎 <span style="color:#FFF176;">EcoStats</span>
+            🌎 <span style="color:#2E8B57 ;">EcoStats</span>
         </h1>
         <h2 style="
             text-align: center;
-            color: #FFF176;
+            color: #2E8B57 ;
             font-size: 50px;
             font-family: 'Trebuchet MS', sans-serif;
             margin-top: -10px;
@@ -175,7 +175,7 @@ if menu == "Inicio":
             Explora, visualiza y comprende los datos ambientales de Santander — una experiencia interactiva con RACiMo.
         </p>
         
-        <hr style="border: 1px solid #FFF176; width: 80%; margin:auto; margin-bottom:40px;">
+        <hr style="border: 1px solid #2E8B57 ; width: 80%; margin:auto; margin-bottom:40px;">
         """,
         unsafe_allow_html=True
     )
@@ -237,7 +237,7 @@ if menu == "Inicio":
 
     st.markdown("---")
     st.markdown("""
-    <h3 style="text-align:center; color:#FFF9C4; font-size:24px;">
+    <h3 style="text-align:center; color:#2E8B57 ; font-size:24px;">
         🌍 Entender los datos ambientales nos ayuda a actuar: plantar árboles, reducir la contaminación y adaptarnos al cambio climático.
     </h3>
     <p style="text-align:center; font-size:18px; color:#EAEAEA;">
