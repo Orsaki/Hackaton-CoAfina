@@ -2,7 +2,7 @@
 [theme]
 
 # Color primario (botones, sliders, widgets) - Un amarillo/ámbar vibrante
-primaryColor="#F39C12"
+primaryColor="#000000"
 
 # Color de fondo principal - Negro
 backgroundColor="#0E1117"
