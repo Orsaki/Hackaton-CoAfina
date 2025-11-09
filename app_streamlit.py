@@ -1046,14 +1046,14 @@ elif menu == "Chatbot":
 
 
 
-# SECCIÓN: EQUIPO (con colores verdes unificados)
+# SECCIÓN: EQUIPO (centrado y totalmente funcional)
 # -----------------------------------------------
 elif menu == "Equipo":
     st.markdown("""
     <style>
         .team-banner {
             text-align: center;
-            color: #2E8B57;
+            color: #5E0C15;
             font-size: 36px;
             font-weight: bold;
             margin-top: 20px;
@@ -1061,7 +1061,7 @@ elif menu == "Equipo":
         }
         .team-subtitle {
             text-align: center;
-            color: #2E8B57;
+            color: #5E0C15;
             font-size: 16px;
             margin-bottom: 30px;
         }
@@ -1075,66 +1075,51 @@ elif menu == "Equipo":
             max-width: 1000px;
         }
         .member-card {
-            background-color: #DDE6D5;
-            color: #2E8B57;
+            background-color: #FFDDCC;
+            color: #5E0C15;
             border-radius: 20px;
             padding: 25px;
             width: 260px;
             text-align: center;
-            box-shadow: 4px 6px 14px rgba(0,0,0,0.15);
+            box-shadow: 4px 6px 14px rgba(0,0,0,0.2);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .member-card:hover {
             transform: translateY(-8px);
-            box-shadow: 6px 8px 18px rgba(0,0,0,0.25);
+            box-shadow: 6px 8px 18px rgba(0,0,0,0.3);
         }
         .member-name {
             font-size: 20px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: #2E8B57;
+            color: #5E0C15;
         }
         .member-link {
             margin-top: 10px;
-            color: #2E8B57;
+            color: #5E0C15;
         }
         .member-link a {
             text-decoration: none;
-            color: #2E8B57;
+            color: #CC878B;
             font-weight: bold;
             transition: color 0.3s ease;
         }
         .member-link a:hover {
-            color: #1F6B44;
+            color: #5E0C15;
+        }
+        .emoji {
+            font-size: 22px;
+            margin-bottom: 8px;
         }
     </style>
 
-    <p style="color: #2E8B57; font-size: 28px; text-align: center; line-height: 1.6; max-width: 850px; margin: 0 auto;">
-    Somos el equipo que da vida a <b>EcoStats</b>, una iniciativa dedicada a convertir los datos ambientales en conocimiento útil y accesible para todos. 
-    Nuestro objetivo es impulsar la comprensión del entorno mediante herramientas tecnológicas que inspiren un cambio sostenible.
-    </p>
+    <p style="color: #5E0C15; font-size: 28px; text-align: center; line-height: 1.6;"> Somos el grupo detrás de <b>EcoStats</b>, comprometidos con transformar datos ambientales en conocimiento para todos. 🌱</p>
+
 
     <div class="team-container">
-        <div class="member-card">
-            <div class="member-name">Daniel Ormeño</div>
-            <div class="member-link">Visita mi GitHub <a href="https://github.com/Orsaki" target="_blank">aquí</a></div>
-        </div>
-
-        <div class="member-card">
-            <div class="member-name">Brisa Paredes</div>
-            <div class="member-link">Visita mi GitHub <a href="https://github.com/BrisaParedes" target="_blank">aquí</a></div>
-        </div>
-
-        <div class="member-card">
-            <div class="member-name">Pamela Lázaro</div>
-            <div class="member-link">Visita mi GitHub <a href="https://github.com/lazaropamela" target="_blank">aquí</a></div>
-        </div>
-
-        <div class="member-card">
-            <div class="member-name">Fátima Montes</div>
-            <div class="member-link">Visita mi GitHub <a href="https://github.com/FatimaMY" target="_blank">aquí</a></div>
-        </div>
+        <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Daniel Ormeño</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/Orsaki" target="_blank">aquí</a></div><div>💻</div></div>
+        <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Brisa Paredes</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/BrisaParedes" target="_blank">aquí</a></div><div>💻</div></div>
+        <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Pamela Lázaro</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/lazaropamela" target="_blank">aquí</a></div><div>💻</div></div>
+        <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Fátima Montes</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/FatimaMY" target="_blank">aquí</a></div><div>💻</div></div>
     </div>
     """, unsafe_allow_html=True)
-
-
