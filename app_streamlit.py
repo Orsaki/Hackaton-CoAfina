@@ -958,7 +958,7 @@ elif menu == "Equipo":
             font-size: 20px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: #fcfafa ;
+            color: #DDE6D5 ;
         }
         .member-link {
             margin-top: 10px;
@@ -966,12 +966,12 @@ elif menu == "Equipo":
         }
         .member-link a {
             text-decoration: none;
-            color: #DDE6D5 ;
+            color: #CC878B;
             font-weight: bold;
             transition: color 0.3s ease;
         }
         .member-link a:hover {
-            color: #DDE6D5 ;
+            color: #5E0C15;
         }
         .emoji {
             font-size: 22px;
@@ -979,14 +979,9 @@ elif menu == "Equipo":
         }
     </style>
 
-    <p style="color: #2E8B57; font-size: 28px; text-align: center; line-height: 1.6;"> Somos el grupo detrás de <b>EcoStats</b>, comprometidos con transformar datos ambientales en conocimiento para todos. 🌱</p>
+    <p style="color: #5E0C15; font-size: 28px; text-align: center; line-height: 1.6;"> Somos el grupo detrás de <b>EcoStats</b>, comprometidos con transformar datos ambientales en conocimiento para todos. 🌱</p>
 
 
     <div class="team-container">
-        <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Daniel Ormeño</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/Orsaki" target="_blank">aquí</a></div><div>💻</div></div>
-        <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Brisa Paredes</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/BrisaParedes" target="_blank">aquí</a></div><div>💻</div></div>
-        <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Pamela Lázaro</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/lazaropamela" target="_blank">aquí</a></div><div>💻</div></div>
-        <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Fátima Montes</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/FatimaMY" target="_blank">aquí</a></div><div>💻</div></div>
-    </div>
-    """, unsafe_allow_html=True)
-
+</div>
+    """)
