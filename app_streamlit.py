@@ -942,7 +942,7 @@ elif menu == "Equipo":
         }
         .member-card {
             background-color: #2E8B57;
-            color: #5E0C15;
+            color: #DDE6D5 ;
             border-radius: 20px;
             padding: 25px;
             width: 260px;
@@ -958,11 +958,11 @@ elif menu == "Equipo":
             font-size: 20px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: #5E0C15;
+            color: #DDE6D5 ;
         }
         .member-link {
             margin-top: 10px;
-            color: #5E0C15;
+            color: #DDE6D5 ;
         }
         .member-link a {
             text-decoration: none;
