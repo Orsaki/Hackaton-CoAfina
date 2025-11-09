@@ -111,143 +111,188 @@ with st.sidebar:
 # -----------------------------
 # SECCIÓN: INICIO (Tus "Datos teóricos")
 # -----------------------------
+# -----------------------------
+# SECCIÓN: INICIO (Tus "Datos teóricos")
+# -----------------------------
 if menu == "Inicio":
-    st.markdown("<h1>🌎 <span style='color:#2E8B57 ;'>EcoStats</span></h1>", unsafe_allow_html=True)
+    st.markdown("<h1>🌎 <span style='color:#2E8B57;'>EcoStats</span></h1>",
+                unsafe_allow_html=True)
     st.markdown(
         """
         <style>
-        body {
-            background-color: #0B1D33;
+        /* CSS para las tarjetas de variables */
+        .variable-card {
+            background-color: #FFFFFF; /* Fondo blanco limpio para las tarjetas */
+            border: 1px solid #DDE6D5; /* Borde suave del color secundario */
+            padding: 25px; /* Un poco menos de padding */
+            border-radius: 15px;
+            margin-bottom: 20px; /* Menos margen inferior */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Sombra muy suave */
+            transition: transform 0.3s;
+            display: flex; /* Usamos flex para alinear contenido */
+            flex-direction: column; /* Alineación vertical */
+            width: 100%;
+            height: 100%; /* Asegura que todas las tarjetas tengan la misma altura */
         }
-        .fade-in {
-            animation: fadeIn 2s ease-in-out;
+        .variable-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        /* CSS para los títulos dentro de las tarjetas */
+        .variable-card h3 {
+            color: #2E8B57; /* Verde primario para el título */
+            font-size: 1.15em; /* Tamaño de fuente ligeramente más pequeño */
+            margin-bottom: 10px;
+        }
+        
+        /* CSS para el texto dentro de las tarjetas */
+        .variable-card p, .variable-card small {
+            color: #1C1C1C; /* Color de texto principal */
+            font-size: 0.9em; /* Texto ligeramente más pequeño */
+        }
+        
+        /* CSS para los títulos principales (H1, H2) */
+        h1, h2 {
+            color: #1C1C1C; /* Color de texto principal */
+        }
+        
+        /* Párrafos principales */
+        p {
+            color: #333333; /* Un gris un poco más suave */
         }
         </style>
 
         <h2 style="
             text-align: center;
-            color: #2E8B57 ;
+            color: #1C1C1C; /* Color de texto principal */
             font-size: 32px;
-            font-family: 'Trebuchet MS', sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin-top: 30px;
         ">
             ¿Te gustaría interactuar jugando mediante mapas para entender el clima?
         </h2>
         <p style="
             text-align: center;
-            color: #2E8B57  ;
+            color: #333333;
             font-size: 22px;
-            font-family: 'Verdana', sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin-bottom: 10px;
         ">
             Bienvenido a:
         </p>
         <h1 style="
             text-align: center;
-            color: #FFFFFF;
+            color: #1C1C1C;
             font-size: 90px;
-            font-family: 'Trebuchet MS', sans-serif;
+            font-family: 'Poppins', sans-serif;
             font-weight: 900;
             letter-spacing: 3px;
             margin-top: 0;
         ">
-            🌎 <span style="color:#2E8B57 ;">EcoStats</span>
+            🌎 <span style="color:#2E8B57;">EcoStats</span>
         </h1>
         <h2 style="
             text-align: center;
-            color: #2E8B57 ;
+            color: #2E8B57; /* Verde primario */
             font-size: 50px;
-            font-family: 'Trebuchet MS', sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin-top: -10px;
         ">
             Clima en Movimiento
         </h2>
         <p style="
             text-align: center;
-            color: #2E8B57  ;
+            color: #333333;
             font-size: 22px;
-            font-family: 'Verdana', sans-serif;
+            font-family: 'Poppins', sans-serif;
         ">
             Explora, visualiza y comprende los datos ambientales de Santander — una experiencia interactiva con RACiMo.
         </p>
         
-        <hr style="border: 1px solid #2E8B57 ; width: 80%; margin:auto; margin-bottom:40px;">
+        <hr style="border: 1px solid #DDE6D5; width: 80%; margin:auto; margin-bottom:40px;">
         """,
         unsafe_allow_html=True
     )
 
-    st.markdown("<h2 style='color:#2E8B57; text-align:center; margin-top:40px;'>🌦️ Variables que podrás explorar:</h2>", unsafe_allow_html=True)
-    col1, col2 = st.columns(2, gap="large")
-
+    st.markdown("<h2 style='text-align:center; margin-top:40px;'>🌦️ Variables que podrás explorar:</h2>", unsafe_allow_html=True)
+    
+    # --- FILA 1 DE VARIABLES ---
+    col1, col2, col3, col4 = st.columns(4, gap="large")
     with col1:
         st.markdown("""
         <div class="variable-card">
-            <h3 style="color:#ffffff;">🌡️ Temperatura</h3>
-            <p style="color:#C1D1B4  ;">Indica qué tan caliente o frío está el ambiente. Afecta la salud, la agricultura y los ecosistemas.</p>
-            <small style="color:#C1D1B4;">Un aumento sostenido puede indicar olas de calor.</small>
+            <h3>🌡️ Temperatura</h3>
+            <p>Indica qué tan caliente o frío está el ambiente. Afecta la salud, la agricultura y los ecosistemas.</p>
         </div>
-
-        <div class="variable-card">
-            <h3 style="color:#ffffff;">💧 Humedad Relativa</h3>
-            <p style="color:#C1D1B4  ;">Nos dice cuánta agua hay en el aire. Una alta humedad puede hacer que sintamos más calor.</p>
-        </div>
-
-        <div class="variable-card">
-            <h3 style="color:#ffffff;">🌧️ Precipitación</h3>
-            <p style="color:#C1D1B4  ;">Cantidad de lluvia registrada. Es clave para entender sequías, inundaciones y el ciclo del agua.</p>
-        </div>
-
-        <style>
-        .variable-card {
-            background-color:#2E8B57  ;
-            padding:30px;
-            border-radius:15px;
-            margin-bottom:40px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-            transition: transform 0.3s;
-            display: inline-block;
-            width: 100%;
-        }
-        .variable-card:hover {
-            transform: translateY(-10px);
-        }
-        </style>
         """, unsafe_allow_html=True)
-
     with col2:
         st.markdown("""
         <div class="variable-card">
-            <h3 style="color:#ffffff;">🌫️ PM2.5 (Partículas finas)</h3>
-            <p style="color:#C1D1B4  ;">Son pequeñas partículas en el aire que pueden afectar la salud respiratoria.</p>
-            <small style="color:#C1D1B4;">Se miden en microgramos por metro cúbico (µg/m³).</small>
+            <h3>💧 Humedad Relativa</h3>
+            <p>Nos dice cuánta agua hay en el aire. Una alta humedad puede hacer que sintamos más calor.</p>
         </div>
-
+        """, unsafe_allow_html=True)
+    with col3:
+        st.markdown("""
         <div class="variable-card">
-            <h3 style="color:#ffffff;">🌈 Índice de Calidad del Aire (ICA)</h3>
-            <p style="color:#C1D1B4  ;">Nos muestra qué tan limpio o contaminado está el aire mediante una escala de colores:</p>
-            <p style="color:#FFFFFF;">
-            🟢 Buena | 🟡 Moderada | 🟠 Regular | 🔴 Mala
-            </p>
+            <h3>🌧️ Precipitación</h3>
+            <p>Cantidad de lluvia registrada. Es clave para entender sequías, inundaciones y el ciclo del agua.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col4:
+        st.markdown("""
+        <div class="variable-card">
+            <h3>🌫️ PM2.5 (Partículas finas)</h3>
+            <p>Pequeñas partículas en el aire que pueden afectar la salud respiratoria.</p>
+            <small>Límite de riesgo: 56 µg/m³.</small>
         </div>
         """, unsafe_allow_html=True)
 
+    # --- FILA 2 DE VARIABLES ---
+    col5, col6, col7, col8 = st.columns(4, gap="large")
+    with col5:
+        st.markdown("""
+        <div class="variable-card">
+            <h3>🌈 Índice de Calidad del Aire (ICA)</h3>
+            <p>Un indicador que traduce los contaminantes a un nivel de riesgo fácil de entender (🟢, 🟡, 🟠, 🔴).</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col6:
+        st.markdown("""
+        <div class="variable-card">
+            <h3>💨 Velocidad del Viento</h3>
+            <p>Muestra la rapidez (km/h) del viento. Ayuda a dispersar contaminantes, pero también puede causar daños.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col7:
+        st.markdown("""
+        <div class="variable-card">
+            <h3>🧭 Dirección del Viento</h3>
+            <p>Indica *de dónde* viene el viento (N, S, E, O). Se usa en el gráfico de Rosa de Vientos.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col8:
+        st.markdown("""
+        <div class="variable-card">
+            <h3>☁️ Presión Barométrica</h3>
+            <p>El peso del aire (hPa). Generalmente, una presión baja indica mal tiempo (lluvias) y una alta indica buen tiempo.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+
     st.markdown("---")
     st.markdown("""
-    <h3 style="text-align:center; color:#2E8B57 ; font-size:24px;">
+    <h3 style="text-align:center; color:#1C1C1C; font-size:24px;">
         🌍 Entender los datos ambientales nos ayuda a actuar: plantar árboles, reducir la contaminación y adaptarnos al cambio climático.
     </h3>
-    <p style="text-align:center; font-size:18px; color:#2E8B57;">
+    <p style="text-align:center; font-size:18px; color:#333333;">
         <b>¡Cada dato cuenta para cuidar nuestro planeta! 🌎</b>
     </p>
     """, unsafe_allow_html=True)
     st.markdown("---")
     st.info(
         "Agradecimientos a la Red Ambiental Ciudadana de Monitoreo (RACiMo). [Visita su página aquí](https://class.redclara.net/halley/moncora/intro.html).")
-
 
 # SECCIÓN: MAPA DE ESTACIONES (usando Kepler.gl publicado en GitHub Pages)
 # ----------------------------------------------------------
