@@ -398,8 +398,6 @@ elif menu == "Mapa de Estaciones":
 
 
 
-
-
 # -----------------------------------------------
 # SECCIÓN: ANÁLISIS POR ESTACIÓN
 # -----------------------------------------------
@@ -420,7 +418,8 @@ elif menu == "Análisis por Estación":
                 "Humedad (%)": "humedad",
                 "Velocidad Viento (km/h)": "viento_velocidad",
                 "Dirección Viento (Rosa)": "viento_direccion",
-                "Presión Barométrica (hPa)": "presion"
+                "Presión Barométrica (hPa)": "presion",
+                "Índice de Calidad del Aire (ICA)": "ica" # <-- ¡NUEVO GRÁFICO!
             }
             variable_choice_label = st.selectbox(
                 label="Selecciona la Variable:",
@@ -455,21 +454,18 @@ elif menu == "Análisis por Estación":
             (df['month'] == selected_month_num)
         ]
         
-        # --- Obtener datos válidos para la métrica ---
-        # df_filtered_valid contendrá los datos limpios de NaN para la columna actual.
         df_filtered_valid = get_valid_data(df_filtered, data_col)
         
-        # --- Chequeo de datos ---
         if df_filtered_valid.empty:
-            st.warning(f"No hay datos de {data_col} para '{selected_station}' en {month_map.get(selected_month_num, '')}.")
+            st.warning(f"No hay datos de {variable_choice_label} para '{selected_station}' en {month_map.get(selected_month_num, '')}.")
         
         else:
+            
             # ==========================================================
             # GRÁFICO 1: PM2.5 (Adaptado a 'pm2_5')
             # ==========================================================
             if data_col == "pm2_5":
                 
-                # --- Métricas con iconos ---
                 stat_col1, stat_col2, stat_col3 = st.columns(3)
                 stat_col1.metric("📈 Máximo (µg/m³)", f"{df_filtered_valid[data_col].max():.2f}")
                 stat_col2.metric("📉 Mínimo (µg/m³)", f"{df_filtered_valid[data_col].min():.2f}")
@@ -648,12 +644,71 @@ elif menu == "Análisis por Estación":
                 else:
                     st.warning(
                         f"No hay datos suficientes de Viento para '{selected_station}' en {month_map.get(selected_month_num, '')}.")
+            
+            # ==========================================================
+            # GRÁFICO 8: ÍNDICE DE CALIDAD DEL AIRE (ICA) (¡NUEVO!)
+            # ==========================================================
+            elif data_col == "ica":
+
+                # --- Métricas con iconos ---
+                stat_col1, stat_col2, stat_col3 = st.columns(3)
+                stat_col1.metric(
+                    "📈 ICA Máximo", f"{df_filtered_valid[data_col].max():.2f}")
+                stat_col2.metric(
+                    "📉 ICA Mínimo", f"{df_filtered_valid[data_col].min():.2f}")
+                stat_col3.metric(
+                    "📊 ICA Medio", f"{df_filtered_valid[data_col].mean():.2f}")
+                st.markdown("---")
+
+                # Agrupamos por día para que el gráfico sea legible
+                df_ica_daily = df_filtered_valid.set_index('timestamp').resample('D')[
+                    data_col].mean().reset_index()
+
+                fig_ica = px.line(
+                    df_ica_daily,
+                    x='timestamp',
+                    y=data_col,
+                    title=f'ICA Promedio Diario - {selected_station} ({month_map.get(selected_month_num, "")})',
+                    labels={'ica': 'ICA Promedio', 'timestamp': 'Fecha'},
+                    template='plotly_white'
+                )
+
+                # Agregar bandas de color según ICA
+                bands = [
+                    {'y0': 0, 'y1': 50, 'color': '#a8e6a1',
+                     'label': 'Bueno (0-50)'},
+                    {'y0': 51, 'y1': 100, 'color': '#fff3a1',
+                     'label': 'Moderado (51-100)'},
+                    {'y0': 101, 'y1': 150, 'color': '#ffcc99',
+                     'label': 'Desfavorable (G. Sensibles)'},
+                    {'y0': 151, 'y1': 200, 'color': '#ff9999',
+                     'label': 'Dañino (151-200)'}
+                ]
+                
+                # Definir el rango máximo del eje Y
+                # Asegura que al menos llegue a 200
+                max_y = max(200, df_ica_daily[data_col].max() * 1.1)
+
+                for b in bands:
+                    fig_ica.add_hrect(
+                        y0=b['y0'], y1=b['y1'],
+                        fillcolor=b['color'], opacity=0.25,
+                        line_width=0,
+                        annotation_text=f"<b>{b['label']}</b>",
+                        annotation_position='top left',
+                        annotation_font=dict(size=13, color="black")
+                    )
+
+                fig_ica.update_layout(
+                    yaxis_range=[0, max_y],
+                    title_x=0.5
+                )
+                
+                st.plotly_chart(fig_ica, use_container_width=True)
 
     else:
         st.warning(
             "No se pudieron cargar los datos. Verifica que 'datos_limpios.csv' esté en el mismo directorio.")
-
-
 
 
 # -----------------------------------------------
