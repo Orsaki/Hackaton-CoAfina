@@ -1,17 +1,7 @@
 # Archivo: .streamlit/config.toml
 [theme]
-
-# Color primario (botones, sliders, widgets) - Un amarillo/ámbar vibrante
-primaryColor="#FAAF5A"
-
-# Color de fondo principal - Negro
-backgroundColor="#000000"
-
-# Color de fondo para elementos como la barra lateral
-secondaryBackgroundColor="#FAAF5A"
-
-# Color del texto principal
-textColor="#FFFFFF"
-
-# Fuente
-font="Quicksand"
+primaryColor = "#2E8B57"              # Verde bosque
+backgroundColor = "#F5F7F2"           # Fondo suave tipo papel
+secondaryBackgroundColor = "#DDE6D5"  # Verde claro de apoyo
+textColor = "#1C1C1C"                 # Gris oscuro
+font = "Poppins"                      # Fuente elegante y amigable
