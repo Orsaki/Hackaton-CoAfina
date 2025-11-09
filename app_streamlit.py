@@ -654,10 +654,12 @@ elif menu == "Análisis por Estación":
             "No se pudieron cargar los datos. Verifica que 'datos_limpios.csv' esté en el mismo directorio.")
 
 # -----------------------------------------------
-# SECCIÓN: CHATBOT (¡CON LÓGICA CONTEXTUAL Y CORRECTA!)
+# SECCIÓN: CHATBOT (¡CON LÓGICA DE BOTONES!)
 # -----------------------------------------------
 elif menu == "Chatbot":
-    
+    st.title("Asistente Virtual EcoStats 🤖")
+    st.write("¡Hola! Soy EcoBot. Estoy aquí para ayudarte a navegar y entender los datos de la plataforma.")
+
     # --- DATOS DE ESTADÍSTICAS GLOBALES PARA EL CHATBOT ---
     # (Asegúrate de que este diccionario esté definido en la parte superior de tu script)
     STATION_STATS_DATA = {
@@ -798,31 +800,14 @@ elif menu == "Chatbot":
     # --- LÓGICA DE CHATBOT MEJORADA ---
     
     # 1. Mapas de conocimiento del Bot
-    
-    # Aseguramos que la lista esté ordenada para que los números coincidan
     unique_stations = sorted(list(STATION_STATS_DATA.keys()))
     station_count = len(unique_stations)
     
     # Mapa de Índice de Estaciones (Número -> Nombre)
     station_index_map = {index + 1: station for index, station in enumerate(unique_stations)}
     numbered_list_str_stations = "\n".join([f"{i}. {station}" for i, station in station_index_map.items()])
-    
-    # Mapeo de palabras (números) a índice de Estación
-    number_word_map_stations = {
-        'primera': 1, '1ra': 1, '1': 1,
-        'segunda': 2, '2da': 2, '2': 2,
-        'tercera': 3, '3ra': 3, '3': 3,
-        'cuarta': 4, '4ta': 4, '4': 4,
-        'quinta': 5, '5ta': 5, '5': 5,
-        'sexta': 6, '6ta': 6, '6': 6,
-        'séptima': 7, 'septima': 7, '7ma': 7, '7': 7,
-        'octava': 8, '8va': 8, '8': 8,
-        'novena': 9, '9na': 9, '9': 9,
-        'décima': 10, 'decima': 10, '10ma': 10, '10': 10,
-        'onceava': 11, '11va': 11, '11': 11
-    }
 
-    # Mapa de Definiciones de Variables
+    # Mapeo de Definiciones de Variables
     VARIABLE_DESCRIPTIONS = {
         "pm2_5": "**PM2.5 (µg/m³)**: Son las partículas contaminantes más peligrosas. El gráfico en 'Análisis por Estación' muestra una línea roja en **56 µg/m³**, que es el límite de riesgo.",
         "temperatura": "**Temperatura (°C)**: Es el grado de calor. El gráfico en 'Análisis por Estación' usa puntos de colores (azul a rojo) para identificar fácilmente picos de calor o frío.",
@@ -836,41 +821,8 @@ elif menu == "Chatbot":
     
     # Mapa de Índice de Variables (Número -> Clave)
     VARIABLE_INDEX_MAP = {
-        1: "pm2_5",
-        2: "temperatura",
-        3: "precipitacion",
-        4: "humedad",
-        5: "viento_velocidad",
-        6: "viento_direccion",
-        7: "presion",
-        8: "ica"
-    }
-
-    # Lista enumerada de variables para mostrar al usuario
-    numbered_list_str_vars = "\n".join([f"{i}. {VARIABLE_DESCRIPTIONS[key].split(':')[0]}" for i, key in VARIABLE_INDEX_MAP.items()])
-
-    # Mapeo de palabras clave (prompt) a clave de variable
-    VAR_MAP_QUERY = {
-        'pm2.5': 'pm2_5', 'partículas': 'pm2_5', 'contaminación': 'pm2_5',
-        'temperatura': 'temperatura', 'temp': 'temperatura', 'calor': 'temperatura',
-        'humedad': 'humedad',
-        'precipitación': 'precipitacion', 'lluvia': 'precipitacion',
-        'viento': 'viento_velocidad', 'velocidad': 'viento_velocidad',
-        'dirección': 'viento_direccion', 'direccion': 'viento_direccion', 'rosa': 'viento_direccion',
-        'presión': 'presion', 'presion': 'presion',
-        'ica': 'ica', 'calidad del aire': 'ica'
-    }
-    
-    # Mapeo de palabras (números) a índice de Variable
-    number_word_map_vars = {
-        'primera': 1, '1ra': 1, '1': 1,
-        'segunda': 2, '2da': 2, '2': 2,
-        'tercera': 3, '3ra': 3, '3': 3,
-        'cuarta': 4, '4ta': 4, '4': 4,
-        'quinta': 5, '5ta': 5, '5': 5,
-        'sexta': 6, '6ta': 6, '6': 6,
-        'séptima': 7, 'septima': 7, '7ma': 7, '7': 7,
-        'octava': 8, '8va': 8, '8': 8
+        1: "pm2_5", 2: "temperatura", 3: "precipitacion", 4: "humedad",
+        5: "viento_velocidad", 6: "viento_direccion", 7: "presion", 8: "ica"
     }
 
     # Mapeo de variables amigables para el Chatbot
@@ -882,168 +834,116 @@ elif menu == "Chatbot":
     
     # -----------------------------------------------------
 
-    st.title("Asistente Virtual EcoStats 🤖")
-    
-    # Inicializar el historial del chat
+    # Inicializar el estado del chat
+    if "chat_stage" not in st.session_state:
+        st.session_state.chat_stage = "inicio"
+        
     if "messages" not in st.session_state:
         st.session_state.messages = [
             {"role": "assistant",
-             "content": "👋 ¡Hola! Soy **EcoBot**, tu guía en *EcoStats*. ¿Cómo puedo ayudarte a entender los gráficos?"}
+             "content": "¡Hola! Soy EcoBot. ¿En qué te puedo ayudar hoy? 😊"}
         ]
 
-    # Mostrar historial
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+    # Mostrar mensajes previos
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-    # Input del usuario
-    if prompt := st.chat_input("Escribe tu pregunta aquí... (ej. 'temperatura máxima de Halley UIS')"):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        prompt_lower = prompt.lower()
-        
-        # Mostrar mensaje del usuario
-        with st.chat_message("user"):
-            st.markdown(prompt)
+    # --- LÓGICA DE BOTONES ---
+    
+    def handle_option(option):
+        st.session_state.chat_stage = option
+        # Añadir el clic del botón como si fuera un mensaje del usuario
+        st.session_state.messages.append({"role": "user", "content": option})
 
-        # Generar respuesta del asistente
+    # ESTADO INICIAL: Mostrar opciones principales
+    if st.session_state.chat_stage == "inicio":
+        st.write("---") # Separador visual
+        cols = st.columns(3)
+        cols[0].button("Entender las Variables 📚", on_click=handle_option, args=["variables"], use_container_width=True)
+        cols[1].button("Info de Estaciones 📡", on_click=handle_option, args=["estaciones"], use_container_width=True)
+        cols[2].button("Fuente de Datos (RACiMo) 🔗", on_click=handle_option, args=["racimo"], use_container_width=True)
+
+    # ESTADO 1: El usuario quiere entender las variables
+    elif st.session_state.chat_stage == "variables":
         with st.chat_message("assistant"):
-            response = ""
+            st.markdown("¡Genial! Estas son las variables que analizamos. Haz clic en una para saber qué significa:")
+        
+        # Crear botones para cada variable
+        var_cols = st.columns(4)
+        var_keys = list(VARIABLE_INDEX_MAP.values())
+        
+        for i, key in enumerate(var_keys):
+            label = variable_friendly_map.get(key, key)
+            if var_cols[i % 4].button(label, on_click=handle_option, args=[key], use_container_width=True):
+                pass
+        
+        st.button("← Volver al menú", on_click=handle_option, args=["inicio"])
 
-            # --- DICCIONARIOS DE MAPPING PARA CONSULTAS ---
-            stat_keywords = {'máxima': 'max', 'maxima': 'max', 'mínima': 'min', 'minima': 'min', 'media': 'mean', 'promedio': 'mean', 'total': 'sum', 'sumatoria': 'sum'}
-            
-            found_stat_key = None
-            found_var_key = None
-            found_station = None
-            
-            # 1. Identificar la estadística, variable y estación
-            
-            # Intento 1: Identificar Estación por Nombre
-            for station_name in unique_stations:
-                if station_name.lower() in prompt_lower:
-                    found_station = station_name
-                    break
-            
-            # Intento 2: Identificar Estación por Número (SI LA PALABRA "estación" ESTÁ)
-            if not found_station and ("estación" in prompt_lower or "estacion" in prompt_lower):
-                for word in prompt_lower.split():
-                    if word in number_word_map_stations:
-                        index = number_word_map_stations[word]
-                        if index in station_index_map:
-                            found_station = station_index_map[index]
-                            break
+    # ESTADO 2: El usuario quiere info de estaciones
+    elif st.session_state.chat_stage == "estaciones":
+        with st.chat_message("assistant"):
+            st.markdown(f"Actualmente monitoreamos **{station_count} estaciones** de la red RACiMo en Santander.\n\n{numbered_list_str_stations}")
+            st.markdown("---")
+            st.markdown("¿Te gustaría ver un resumen de las estadísticas (Máx/Mín/Media) de todas estas estaciones?")
+        
+        cols_est = st.columns(3)
+        cols_est[0].button("Sí, mostrar estadísticas", on_click=handle_option, args=["stats_si"], use_container_width=True)
+        cols_est[1].button("No, gracias", on_click=handle_option, args=["inicio"], use_container_width=True)
+        cols_est[2].button("← Volver al menú", on_click=handle_option, args=["inicio"], use_container_width=True)
 
-            # Intento 3: Identificar Variable por Nombre
-            for keyword, var_name in VAR_MAP_QUERY.items():
-                if keyword in prompt_lower:
-                    found_var_key = var_name
-                    break
-            
-            # Intento 4: Identificar Variable por Número (SI LA PALABRA "variable" ESTÁ)
-            if not found_var_key and "variable" in prompt_lower:
-                for word in prompt_lower.split():
-                    if word in number_word_map_vars:
-                        index = number_word_map_vars[word]
-                        if index in VARIABLE_INDEX_MAP:
-                            found_var_key = VARIABLE_INDEX_MAP[index]
-                            break
+    # ESTADO 3: El usuario quiere el link de RACiMo
+    elif st.session_state.chat_stage == "racimo":
+        with st.chat_message("assistant"):
+            st.markdown(
+                "Todos nuestros datos provienen de la **Red Ambiental Ciudadana de Monitoreo (RACiMo)**. "
+                "Son una fuente increíble de información ambiental para Santander."
+            )
+            st.markdown("Puedes visitar su sitio oficial aquí:\n"
+                        "[https://class.redclara.net/halley/moncora/intro.html](https://class.redclara.net/halley/moncora/intro.html)")
+        st.button("← Volver al menú", on_click=handle_option, args=["inicio"])
+        st.session_state.messages.append({"role": "assistant", "content": "Aquí tienes el enlace a RACiMo: https://class.redclara.net/halley/moncora/intro.html"})
 
-            # Intento 5: Identificar Estadística
-            for keyword, stat_name in stat_keywords.items():
-                if keyword in prompt_lower:
-                    found_stat_key = stat_name.lower()
-                    break
+    # ESTADO: Mostrar estadísticas de TODAS las estaciones
+    elif st.session_state.chat_stage == "stats_si":
+        with st.chat_message("assistant"):
+            st.markdown("Aquí tienes el resumen estadístico (Máx/Mín/Media) de todo el periodo para cada estación:")
             
-            # -------------------------------------------------------------------
-            # --- LÓGICA DE RESPUESTAS (Prioridad Inversa) ---
-            # -------------------------------------------------------------------
-            
-            # 1. Saludos y Despedidas
-            if "adios" in prompt_lower or "chao" in prompt_lower or "hasta luego" in prompt_lower:
-                response = "¡Hasta pronto! Que tengas un excelente día. Vuelve cuando quieras explorar más datos. 👋"
-            
-            elif "hola" in prompt_lower or "saludos" in prompt_lower or "buenos dias" in prompt_lower:
-                response = "¡Hola! Soy EcoBot. Es un placer saludarte. ¿Qué te gustaría que te explique sobre el dashboard o los datos de RACiMo?"
-
-            # 2. Lista de Variables
-            elif "cuales son las variables" in prompt_lower or "dime las variables" in prompt_lower or "lista de variables" in prompt_lower:
-                response = f"Analizamos 8 variables principales. Puedes preguntarme por ellas (ej. '¿qué es la variable 1?' o '¿qué es PM2.5?'):\n\n{numbered_list_str_vars}"
-
-            # 3. Lista de Estaciones
-            elif "cuantas estaciones" in prompt_lower or "cuales son las estaciones" in prompt_lower or "lista de estaciones" in prompt_lower or "dime las estaciones" in prompt_lower:
-                response = f"Actualmente monitoreamos **{station_count} estaciones**:\n\n{numbered_list_str_stations}\n\nPuedes preguntarme por el nombre o el número (ej. 'dame las estadísticas de la estación 1')."
-
-            # 4. Ubicación General
-            elif "ubicacion" in prompt_lower or "donde estan" in prompt_lower or "zona de estudio" in prompt_lower:
-                response = "Nuestra zona de estudio principal es el departamento de **Santander, Colombia**. Puedes ver los puntos exactos en la sección **'Mapa de Estaciones'**."
-            
-            # 5. Navegación
-            elif "mapa" in prompt_lower and "animado" not in prompt_lower:
-                response = "Puedes ver la ubicación de todas las estaciones en la sección **'Mapa de Estaciones'** en el menú de la izquierda."
-            elif "animación" in prompt_lower or "evolución" in prompt_lower:
-                response = "La sección **'Animación de Datos'** te permite seleccionar una variable y ver cómo cambian los niveles en todas las estaciones con el tiempo, como un *time-lapse*."
-            elif "análisis" in prompt_lower or "gráfico" in prompt_lower or "sección" in prompt_lower:
-                response = (
-                    "La sección **'Análisis por Estación'** es para ver gráficos detallados. "
-                    "Recuerda que tienes **tres filtros** arriba (Variable, Estación y Mes) para refinar tu vista."
-                )
-            
-            # 6. Estadística Específica (La consulta más compleja)
-            elif found_stat_key and found_var_key and found_station:
-                station_data = STATION_STATS_DATA[found_station]['stats']
-                
-                if found_var_key == 'precipitacion' and found_stat_key == 'sum':
-                    json_key = 'sum'; stat_name_es = 'Total Acumulada'
-                elif found_var_key == 'precipitacion' and found_stat_key == 'max':
-                    json_key = 'max'; stat_name_es = 'Máxima (15min)'
-                else:
-                    json_key = found_stat_key; stat_name_es = found_stat_key.capitalize()
-
-                try:
-                    value = station_data[found_var_key][json_key]
-                    unit = station_data[found_var_key]['unit']
-                    response = (
-                        f"La estadística **{stat_name_es} de {variable_friendly_map.get(found_var_key, found_var_key.capitalize())}** "
-                        f"registrada en la estación **{found_station}** es de: **{value:.2f} {unit}**."
-                    )
-                except KeyError:
-                     response = f"No pude encontrar el valor '{stat_name_es}' para la variable '{found_var_key.capitalize()}' en esa estación."
-            
-            # 7. Estadística General de Estación (Por nombre o número)
-            elif found_station and ("estadísticas" in prompt_lower or "datos de" in prompt_lower or "háblame de" in prompt_lower or "información de" in prompt_lower):
-                
-                station_data = STATION_STATS_DATA[found_station]
-                stats = station_data['stats']
-                
-                response = f"Aquí están las estadísticas resumidas para la estación **{found_station}**:\n\n"
-                response += f"**Ubicación:** Lat: {station_data['latitud']:.6f}, Lon: {station_data['longitud']:.6f}\n\n"
-                
-                stat_output = []
-                for var_key, stats_dict in stats.items():
-                    var_name = variable_friendly_map.get(var_key, var_key.capitalize())
-                    unit = stats_dict['unit']
+            # Usamos un expander para no saturar el chat
+            with st.expander("Ver Resumen Estadístico Completo", expanded=True):
+                for station_name, data in STATION_STATS_DATA.items():
+                    st.markdown(f"#### 📍 {station_name}")
+                    st.markdown(f"<small>(Lat: {data['latitud']:.6f}, Lon: {data['longitud']:.6f})</small>", unsafe_allow_html=True)
                     
-                    if var_key == 'precipitacion':
-                        stat_output.append(f"**{var_name}:** Total {stats_dict['sum']:.2f} {unit}, Máx (15min) {stats_dict['max']:.2f} {unit}.")
-                    else:
-                        stat_output.append(f"**{var_name} ({unit}):** Máx {stats_dict['max']:.2f}, Mín {stats_dict['min']:.2f}, Media {stats_dict['mean']:.2f}.")
-                
-                response += "\n\n".join(stat_output)
+                    stats = data['stats']
+                    stat_output = []
+                    for var_key, stats_dict in stats.items():
+                        var_name = variable_friendly_map.get(var_key, var_key.capitalize())
+                        unit = stats_dict['unit']
+                        
+                        if var_key == 'precipitacion':
+                            stat_output.append(f"**{var_name}:** Total {stats_dict['sum']:.2f} {unit}, Máx (15min) {stats_dict['max']:.2f} {unit}.")
+                        else:
+                            stat_output.append(f"**{var_name} ({unit}):** Máx {stats_dict['max']:.2f}, Mín {stats_dict['min']:.2f}, Media {stats_dict['mean']:.2f}.")
+                    
+                    st.markdown("\n\n".join(stat_output))
+                    st.markdown("---")
+                    
+        st.button("← Volver al menú", on_click=handle_option, args=["inicio"])
 
-            # 8. Definición de Variable (Por nombre o número)
-            elif found_var_key and ("qué es" in prompt_lower or "explicame" in prompt_lower or "háblame de" in prompt_lower or "definición" in prompt_lower or "variable" in prompt_lower):
-                 response = VARIABLE_DESCRIPTIONS.get(found_var_key, "Lo siento, no tengo una descripción para esa variable específica.")
-            
-            # --- LÓGICA DE FALLO ---
-            elif not response: 
-                response = (
-                    "No estoy seguro de cómo responder a eso. Intenta preguntar por una **variable** ('PM2.5', 'variable 1'), una **sección** ('mapa', 'animación'), o una **estadística específica** (ej. 'máxima temperatura en Halley UIS')."
-                )
-
-            st.session_state.messages.append({"role": "assistant", "content": response})
+    # ESTADOS DINÁMICOS: Mostrar definición de variable
+    else:
+        # Revisa si el estado actual (ej. "pm2_5") es una clave de variable
+        if st.session_state.chat_stage in VARIABLE_DESCRIPTIONS:
             with st.chat_message("assistant"):
-                st.markdown(f"🌿 **EcoBot:** {response}")
-
+                st.markdown(VARIABLE_DESCRIPTIONS[st.session_state.chat_stage])
+            st.button("← Volver a Variables", on_click=handle_option, args=["variables"])
+            st.session_state.messages.append({"role": "assistant", "content": VARIABLE_DESCRIPTIONS[st.session_state.chat_stage]})
+        
+        # Si no, volvemos al inicio (estado por defecto)
+        else:
+            st.session_state.chat_stage = "inicio"
+            st.experimental_rerun() # Forzamos recargar para mostrar el menú inicial
 
 
 # SECCIÓN: EQUIPO (centrado y totalmente funcional)
