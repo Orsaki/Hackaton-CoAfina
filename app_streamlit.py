@@ -710,6 +710,7 @@ elif menu == "Análisis por Estación":
         st.warning(
             "No se pudieron cargar los datos. Verifica que 'datos_limpios.csv' esté en el mismo directorio.")
 
+
 # -----------------------------------------------
 # SECCIÓN: CHATBOT (¡CON LÓGICA DE BOTONES Y GUÍA DE GRÁFICOS!)
 # -----------------------------------------------
@@ -901,16 +902,24 @@ elif menu == "Chatbot":
                 "- **Eje X (Horizontal):** Muestra el tiempo (Días y Horas).\n"
                 "- **Eje Y (Vertical):** Muestra el valor de la variable.\n\n"
                 "**¿Cómo leerlo?** Simplemente sigue la línea. Si sube, el valor aumenta; si baja, disminuye. Es ideal para ver picos (valores máximos) y valles (valores mínimos) durante el mes."
-            )
+            ),
+            "data": pd.DataFrame({
+                'Fecha': pd.to_datetime(['2023-01-01 08:00', '2023-01-01 12:00', '2023-01-01 16:00', '2023-01-01 20:00', '2023-01-02 00:00']),
+                'Valor (ej. Temperatura)': [15, 22, 20, 17, 16]
+            })
         },
         "grafico_area": {
             "title": "💧 Gráfico de Área (Precipitación)",
             "description": (
                 "Este gráfico se usa para la **Precipitación (lluvia)**.\n\n"
                 "- **Eje X (Horizontal):** Muestra el tiempo.\n"
-                "- **Eje Y (Vertical):** Muestra cuántos milímetros (mm) de lluvia cayeron en ese registro (usualmente 15 min).\n\n"
+                "- **Eje Y (Vertical):** Muestra cuántos milímetros (mm) de lluvia cayeron en ese registro.\n\n"
                 "**¿Cómo leerlo?** Los picos altos significan lluvias fuertes. Las métricas sobre el gráfico son clave: 'Total Acumulada' te dice cuánta lluvia cayó en todo el mes."
-            )
+            ),
+            "data": pd.DataFrame({
+                'Fecha': pd.to_datetime(['2023-01-01 12:00', '2023-01-01 13:00', '2023-01-01 14:00', '2023-01-01 15:00']),
+                'Lluvia (mm)': [0, 1.2, 0.5, 0]
+            })
         },
         "mapa_calor": {
             "title": "🌡️ Mapa de Calor (Humedad)",
@@ -920,7 +929,12 @@ elif menu == "Chatbot":
                 "- **Eje Y (Vertical):** Muestra las 24 horas del día.\n"
                 "- **Color:** La intensidad del color (más oscuro o más claro) muestra el valor de la humedad.\n\n"
                 "**¿Cómo leerlo?** Busca bandas de color horizontales. Por ejemplo, si la franja de las '4:00' (4 AM) es siempre azul oscura, significa que la madrugada es consistentemente el momento más húmedo del día."
-            )
+            ),
+            "data": pd.DataFrame({
+                'Día': ['Día 1', 'Día 1', 'Día 2', 'Día 2'],
+                'Hora': ['06:00', '14:00', '06:00', '14:00'],
+                'Humedad (Ejemplo)': [90, 60, 88, 65]
+            })
         },
         "rosa_vientos": {
             "title": "🧭 Rosa de Vientos (Dirección del Viento)",
@@ -930,7 +944,11 @@ elif menu == "Chatbot":
                 "- **Longitud de las Barras:** Cuanto más larga es la barra en una dirección, más *frecuentemente* sopló el viento desde allí.\n"
                 "- **Colores:** Los colores en cada barra indican qué tan *fuerte* (rápido) sopló el viento en esa dirección.\n\n"
                 "**¿Cómo leerlo?** La dirección con la barra más larga es la dirección del viento predominante."
-            )
+            ),
+            "data": pd.DataFrame({
+                "Dirección": ["N", "N", "E", "S", "W", "N", "E"],
+                "Velocidad (km/h)": [5, 10, 5, 15, 5, 12, 8]
+            })
         },
         "bandas_ica": {
             "title": "🟢 Gráfico de Bandas (ICA)",
@@ -942,7 +960,11 @@ elif menu == "Chatbot":
                 "  - 🟡 **Moderado (51-100):** Aceptable.\n"
                 "  - 🟠 **Desfavorable (101-150):** Nocivo para grupos sensibles.\n"
                 "  - 🔴 **Dañino (151+):** Nocivo para la salud."
-            )
+            ),
+            "data": pd.DataFrame({
+                'Fecha': pd.to_datetime(['2023-01-01', '2023-01-02', '2023-01-03', '2023-01-04']),
+                'ICA (Ejemplo)': [30, 65, 110, 45]
+            })
         }
     }
     
@@ -1011,20 +1033,33 @@ elif menu == "Chatbot":
 
     # --- LÓGICA DE BOTONES ---
     
+    # Variable para controlar si se debe recargar
+    needs_rerun = False
+
     def handle_option(option):
+        # Esta función ahora solo cambia el estado y añade el mensaje
         st.session_state.chat_stage = option
-        # Añadir el clic del botón como si fuera un mensaje del usuario
         st.session_state.messages.append({"role": "user", "content": option})
+
+    def handle_rerun(option):
+        # Esta función se usa para los botones que SÍ necesitan recargar
+        handle_option(option)
+        st.rerun() # Usamos rerun()
 
     # ESTADO INICIAL: Mostrar opciones principales
     if st.session_state.chat_stage == "inicio":
         st.write("---") # Separador visual
-        cols = st.columns(5) # <-- ¡Añadida una quinta columna!
-        cols[0].button("¿Cómo navegar? 🧭", on_click=handle_option, args=["navegacion"], use_container_width=True)
-        cols[1].button("Entender Gráficos 📈", on_click=handle_option, args=["graficos"], use_container_width=True)
-        cols[2].button("Entender Variables 📚", on_click=handle_option, args=["variables"], use_container_width=True)
-        cols[3].button("Info de Estaciones 📡", on_click=handle_option, args=["estaciones"], use_container_width=True)
-        cols[4].button("Fuente de Datos 🔗", on_click=handle_option, args=["racimo"], use_container_width=True)
+        cols = st.columns(5) 
+        if cols[0].button("¿Cómo navegar? 🧭", use_container_width=True):
+            handle_rerun("navegacion")
+        if cols[1].button("Entender Gráficos 📈", use_container_width=True):
+            handle_rerun("graficos")
+        if cols[2].button("Entender Variables 📚", use_container_width=True):
+            handle_rerun("variables")
+        if cols[3].button("Info de Estaciones 📡", use_container_width=True):
+            handle_rerun("estaciones")
+        if cols[4].button("Fuente de Datos 🔗", use_container_width=True):
+            handle_rerun("racimo")
 
     # --- ESTADO DE NAVEGACIÓN ---
     elif st.session_state.chat_stage == "navegacion":
@@ -1044,7 +1079,8 @@ elif menu == "Chatbot":
             )
             st.markdown(response_nav)
             st.session_state.messages.append({"role": "assistant", "content": response_nav})
-        st.button("← Volver al menú", on_click=handle_option, args=["inicio"])
+        if st.button("← Volver al menú"):
+            handle_rerun("inicio")
 
     # --- ¡NUEVO! ESTADO DE GUÍA DE GRÁFICOS ---
     elif st.session_state.chat_stage == "graficos":
@@ -1052,13 +1088,19 @@ elif menu == "Chatbot":
             st.markdown("¡Perfecto! Estos son los tipos de gráficos que usamos en la sección 'Análisis por Estación'. Haz clic en uno para saber cómo leerlo:")
         
         g_cols = st.columns(5)
-        g_cols[0].button("Gráfico de Línea", on_click=handle_option, args=["grafico_linea"], use_container_width=True)
-        g_cols[1].button("Gráfico de Área", on_click=handle_option, args=["grafico_area"], use_container_width=True)
-        g_cols[2].button("Mapa de Calor", on_click=handle_option, args=["mapa_calor"], use_container_width=True)
-        g_cols[3].button("Rosa de Vientos", on_click=handle_option, args=["rosa_vientos"], use_container_width=True)
-        g_cols[4].button("Bandas ICA", on_click=handle_option, args=["bandas_ica"], use_container_width=True)
+        if g_cols[0].button("Gráfico de Línea", use_container_width=True):
+            handle_rerun("grafico_linea")
+        if g_cols[1].button("Gráfico de Área", use_container_width=True):
+            handle_rerun("grafico_area")
+        if g_cols[2].button("Mapa de Calor", use_container_width=True):
+            handle_rerun("mapa_calor")
+        if g_cols[3].button("Rosa de Vientos", use_container_width=True):
+            handle_rerun("rosa_vientos")
+        if g_cols[4].button("Bandas ICA", use_container_width=True):
+            handle_rerun("bandas_ica")
         
-        st.button("← Volver al menú", on_click=handle_option, args=["inicio"])
+        if st.button("← Volver al menú"):
+            handle_rerun("inicio")
 
     # ESTADO 1: El usuario quiere entender las variables
     elif st.session_state.chat_stage == "variables":
@@ -1070,10 +1112,11 @@ elif menu == "Chatbot":
         
         for i, key in enumerate(var_keys):
             label = variable_friendly_map.get(key, key)
-            if var_cols[i % 4].button(label, on_click=handle_option, args=[key], use_container_width=True):
-                pass
+            if var_cols[i % 4].button(label, key=key, use_container_width=True):
+                handle_rerun(key)
         
-        st.button("← Volver al menú", on_click=handle_option, args=["inicio"])
+        if st.button("← Volver al menú"):
+            handle_rerun("inicio")
 
     # ESTADO 2: El usuario quiere info de estaciones
     elif st.session_state.chat_stage == "estaciones":
@@ -1083,9 +1126,12 @@ elif menu == "Chatbot":
             st.session_state.messages.append({"role": "assistant", "content": response_est})
         
         cols_est = st.columns(3)
-        cols_est[0].button("Sí, mostrar estadísticas", on_click=handle_option, args=["stats_si"], use_container_width=True)
-        cols_est[1].button("No, gracias", on_click=handle_option, args=["inicio"], use_container_width=True)
-        cols_est[2].button("← Volver al menú", on_click=handle_option, args=["inicio"], use_container_width=True)
+        if cols_est[0].button("Sí, mostrar estadísticas", use_container_width=True):
+            handle_rerun("stats_si")
+        if cols_est[1].button("No, gracias", use_container_width=True):
+            handle_rerun("inicio")
+        if cols_est[2].button("← Volver al menú", use_container_width=True):
+            handle_rerun("inicio")
 
     # ESTADO 3: El usuario quiere el link de RACiMo
     elif st.session_state.chat_stage == "racimo":
@@ -1097,7 +1143,8 @@ elif menu == "Chatbot":
         )
         with st.chat_message("assistant"):
             st.markdown(response_racimo)
-        st.button("← Volver al menú", on_click=handle_option, args=["inicio"])
+        if st.button("← Volver al menú"):
+            handle_rerun("inicio")
         st.session_state.messages.append({"role": "assistant", "content": response_racimo})
 
     # ESTADO: Mostrar estadísticas de TODAS las estaciones
@@ -1126,14 +1173,16 @@ elif menu == "Chatbot":
             
             st.session_state.messages.append({"role": "assistant", "content": "*(Se mostró el resumen estadístico)*"})
                     
-        st.button("← Volver al menú", on_click=handle_option, args=["inicio"])
+        if st.button("← Volver al menú"):
+            handle_rerun("inicio")
 
     # ESTADOS DINÁMICOS: Mostrar definición de variable
     elif st.session_state.chat_stage in VARIABLE_DESCRIPTIONS:
         response_var = VARIABLE_DESCRIPTIONS[st.session_state.chat_stage]
         with st.chat_message("assistant"):
             st.markdown(response_var)
-        st.button("← Volver a Variables", on_click=handle_option, args=["variables"])
+        if st.button("← Volver a Variables"):
+            handle_rerun("variables")
         st.session_state.messages.append({"role": "assistant", "content": response_var})
         
     # --- ¡NUEVO! ESTADOS DINÁMICOS: Mostrar definición de tipo de gráfico ---
@@ -1141,15 +1190,58 @@ elif menu == "Chatbot":
         chart_data = CHART_DESCRIPTIONS[st.session_state.chat_stage]
         with st.chat_message("assistant"):
             st.markdown(f"### {chart_data['title']}")
+            
+            # --- Renderizar el gráfico de ejemplo ---
+            if st.session_state.chat_stage == "grafico_linea":
+                fig = px.line(chart_data['data'], x='Fecha', y='Valor (ej. Temperatura)', template="plotly_white", markers=True)
+                fig.update_layout(height=200, margin={"r":0,"t":0,"l":0,"b":0})
+                st.plotly_chart(fig, use_container_width=True)
+                
+            elif st.session_state.chat_stage == "grafico_area":
+                fig = px.area(chart_data['data'], x='Fecha', y='Lluvia (mm)', template="plotly_white")
+                fig.update_layout(height=200, margin={"r":0,"t":0,"l":0,"b":0})
+                st.plotly_chart(fig, use_container_width=True)
+
+            elif st.session_state.chat_stage == "mapa_calor":
+                chart = alt.Chart(chart_data['data']).mark_rect().encode(
+                    x=alt.X('Día:O', axis=None),
+                    y=alt.Y('Hora:O', axis=None),
+                    color=alt.Color('Humedad (Ejemplo):Q', scale=alt.Scale(scheme='tealblues')),
+                    tooltip=['Día', 'Hora', 'Humedad (Ejemplo)']
+                ).properties(height=100)
+                st.altair_chart(chart, use_container_width=True)
+
+            elif st.session_state.chat_stage == "rosa_vientos":
+                fig = px.bar_polar(chart_data['data'], r="Velocidad (km/h)", theta="Dirección", 
+                                   template="plotly_white", color="Velocidad (km/h)",
+                                   color_discrete_sequence=px.colors.sequential.YlOrRd)
+                fig.update_layout(height=300, margin={"r":0,"t":0,"l":0,"b":0})
+                st.plotly_chart(fig, use_container_width=True)
+
+            elif st.session_state.chat_stage == "bandas_ica":
+                fig = px.line(chart_data['data'], x='Fecha', y='ICA (Ejemplo)', template="plotly_white", markers=True)
+                fig.add_hrect(y0=0, y1=50, fillcolor='#a8e6a1', opacity=0.25, line_width=0, annotation_text="Bueno", annotation_position='top left')
+                fig.add_hrect(y0=51, y1=100, fillcolor='#fff3a1', opacity=0.25, line_width=0, annotation_text="Moderado", annotation_position='top left')
+                fig.add_hrect(y0=101, y1=150, fillcolor='#ffcc99', opacity=0.25, line_width=0, annotation_text="Desfavorable", annotation_position='top left')
+                fig.update_layout(height=200, margin={"r":0,"t":0,"l":0,"b":0}, yaxis_range=[0,160])
+                st.plotly_chart(fig, use_container_width=True)
+            
+            # ¡CORRECCIÓN! Mostrar la descripción
             st.markdown(chart_data['description'])
-        st.button("← Volver a Gráficos", on_click=handle_option, args=["graficos"])
-        st.session_state.messages.append({"role": "assistant", "content": chart_data['description']})
+            
+        if st.button("← Volver a Gráficos"):
+            handle_rerun("graficos")
+        # Asegurarse de que la respuesta (con gráfico) se registre, aunque sea solo el texto
+        st.session_state.messages.append({"role": "assistant", "content": f"{chart_data['title']}\n{chart_data['description']}"})
     
     # Si no, volvemos al inicio (estado por defecto)
     else:
         st.session_state.chat_stage = "inicio"
-        st.experimental_rerun() # Forzamos recargar para mostrar el menú inicial
+        needs_rerun = True # Forzamos recargar para mostrar el menú inicial
 
+    # --- CORRECCIÓN: Ejecutar rerun() al final de la lógica de botones ---
+    if needs_rerun:
+        st.rerun()
 
 # -------------------------------------------------
 # SECCIÓN: EQUIPO (centrado y totalmente funcional)
