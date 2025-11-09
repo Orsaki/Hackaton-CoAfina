@@ -139,7 +139,7 @@ if menu == "Inicio":
         </h2>
         <p style="
             text-align: center;
-            color: #E0E0E0;
+            color: #2E8B57  ;
             font-size: 22px;
             font-family: 'Verdana', sans-serif;
             margin-bottom: 10px;
@@ -168,7 +168,7 @@ if menu == "Inicio":
         </h2>
         <p style="
             text-align: center;
-            color: #E0E0E0;
+            color: #2E8B57  ;
             font-size: 22px;
             font-family: 'Verdana', sans-serif;
         ">
@@ -187,23 +187,23 @@ if menu == "Inicio":
         st.markdown("""
         <div class="variable-card">
             <h3 style="color:#FFD700;">🌡️ Temperatura</h3>
-            <p style="color:#E0E0E0;">Indica qué tan caliente o frío está el ambiente. Afecta la salud, la agricultura y los ecosistemas.</p>
+            <p style="color:#2E8B57  ;">Indica qué tan caliente o frío está el ambiente. Afecta la salud, la agricultura y los ecosistemas.</p>
             <small style="color:#B0BEC5;">Un aumento sostenido puede indicar olas de calor.</small>
         </div>
 
         <div class="variable-card">
             <h3 style="color:#FFD700;">💧 Humedad Relativa</h3>
-            <p style="color:#E0E0E0;">Nos dice cuánta agua hay en el aire. Una alta humedad puede hacer que sintamos más calor.</p>
+            <p style="color:#2E8B57  ;">Nos dice cuánta agua hay en el aire. Una alta humedad puede hacer que sintamos más calor.</p>
         </div>
 
         <div class="variable-card">
             <h3 style="color:#FFD700;">🌧️ Precipitación</h3>
-            <p style="color:#E0E0E0;">Cantidad de lluvia registrada. Es clave para entender sequías, inundaciones y el ciclo del agua.</p>
+            <p style="color:#2E8B57  ;">Cantidad de lluvia registrada. Es clave para entender sequías, inundaciones y el ciclo del agua.</p>
         </div>
 
         <style>
         .variable-card {
-            background-color:#123456;
+            background-color:#2E8B57  ;
             padding:30px;
             border-radius:15px;
             margin-bottom:40px;
@@ -222,13 +222,13 @@ if menu == "Inicio":
         st.markdown("""
         <div class="variable-card">
             <h3 style="color:#FFD700;">🌫️ PM2.5 (Partículas finas)</h3>
-            <p style="color:#E0E0E0;">Son pequeñas partículas en el aire que pueden afectar la salud respiratoria.</p>
+            <p style="color:#2E8B57  ;">Son pequeñas partículas en el aire que pueden afectar la salud respiratoria.</p>
             <small style="color:#B0BEC5;">Se miden en microgramos por metro cúbico (µg/m³).</small>
         </div>
 
         <div class="variable-card">
             <h3 style="color:#FFD700;">🌈 Índice de Calidad del Aire (ICA)</h3>
-            <p style="color:#E0E0E0;">Nos muestra qué tan limpio o contaminado está el aire mediante una escala de colores:</p>
+            <p style="color:#2E8B57  ;">Nos muestra qué tan limpio o contaminado está el aire mediante una escala de colores:</p>
             <p style="color:#FFFFFF;">
             🟢 Buena | 🟡 Moderada | 🟠 Regular | 🔴 Mala
             </p>
