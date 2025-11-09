@@ -653,13 +653,14 @@ elif menu == "Análisis por Estación":
         st.warning(
             "No se pudieron cargar los datos. Verifica que 'datos_limpios.csv' esté en el mismo directorio.")
 
+
+
 # -----------------------------------------------
-# SECCIÓN: CHATBOT (¡CON LÓGICA DE BOTONES!)
+# SECCIÓN: CHATBOT (¡CON LÓGICA CONTEXTUAL Y CORRECTA!)
 # -----------------------------------------------
 elif menu == "Chatbot":
     st.title("Asistente Virtual EcoStats 🤖")
-    st.write("¡Hola! Soy EcoBot. Estoy aquí para ayudarte a navegar y entender los datos de la plataforma.")
-
+    
     # --- DATOS DE ESTADÍSTICAS GLOBALES PARA EL CHATBOT ---
     # (Asegúrate de que este diccionario esté definido en la parte superior de tu script)
     STATION_STATS_DATA = {
@@ -800,14 +801,31 @@ elif menu == "Chatbot":
     # --- LÓGICA DE CHATBOT MEJORADA ---
     
     # 1. Mapas de conocimiento del Bot
+    
+    # Aseguramos que la lista esté ordenada para que los números coincidan
     unique_stations = sorted(list(STATION_STATS_DATA.keys()))
     station_count = len(unique_stations)
     
     # Mapa de Índice de Estaciones (Número -> Nombre)
     station_index_map = {index + 1: station for index, station in enumerate(unique_stations)}
     numbered_list_str_stations = "\n".join([f"{i}. {station}" for i, station in station_index_map.items()])
+    
+    # Mapeo de palabras (números) a índice de Estación
+    number_word_map_stations = {
+        'primera': 1, '1ra': 1, '1': 1,
+        'segunda': 2, '2da': 2, '2': 2,
+        'tercera': 3, '3ra': 3, '3': 3,
+        'cuarta': 4, '4ta': 4, '4': 4,
+        'quinta': 5, '5ta': 5, '5': 5,
+        'sexta': 6, '6ta': 6, '6': 6,
+        'séptima': 7, 'septima': 7, '7ma': 7, '7': 7,
+        'octava': 8, '8va': 8, '8': 8,
+        'novena': 9, '9na': 9, '9': 9,
+        'décima': 10, 'decima': 10, '10ma': 10, '10': 10,
+        'onceava': 11, '11va': 11, '11': 11
+    }
 
-    # Mapeo de Definiciones de Variables
+    # Mapa de Definiciones de Variables
     VARIABLE_DESCRIPTIONS = {
         "pm2_5": "**PM2.5 (µg/m³)**: Son las partículas contaminantes más peligrosas. El gráfico en 'Análisis por Estación' muestra una línea roja en **56 µg/m³**, que es el límite de riesgo.",
         "temperatura": "**Temperatura (°C)**: Es el grado de calor. El gráfico en 'Análisis por Estación' usa puntos de colores (azul a rojo) para identificar fácilmente picos de calor o frío.",
@@ -821,8 +839,41 @@ elif menu == "Chatbot":
     
     # Mapa de Índice de Variables (Número -> Clave)
     VARIABLE_INDEX_MAP = {
-        1: "pm2_5", 2: "temperatura", 3: "precipitacion", 4: "humedad",
-        5: "viento_velocidad", 6: "viento_direccion", 7: "presion", 8: "ica"
+        1: "pm2_5",
+        2: "temperatura",
+        3: "precipitacion",
+        4: "humedad",
+        5: "viento_velocidad",
+        6: "viento_direccion",
+        7: "presion",
+        8: "ica"
+    }
+
+    # Lista enumerada de variables para mostrar al usuario
+    numbered_list_str_vars = "\n".join([f"{i}. {VARIABLE_DESCRIPTIONS[key].split(':')[0]}" for i, key in VARIABLE_INDEX_MAP.items()])
+
+    # Mapeo de palabras clave (prompt) a clave de variable
+    VAR_MAP_QUERY = {
+        'pm2.5': 'pm2_5', 'partículas': 'pm2_5', 'contaminación': 'pm2_5',
+        'temperatura': 'temperatura', 'temp': 'temperatura', 'calor': 'temperatura',
+        'humedad': 'humedad',
+        'precipitación': 'precipitacion', 'lluvia': 'precipitacion',
+        'viento': 'viento_velocidad', 'velocidad': 'viento_velocidad',
+        'dirección': 'viento_direccion', 'direccion': 'viento_direccion', 'rosa': 'viento_direccion',
+        'presión': 'presion', 'presion': 'presion',
+        'ica': 'ica', 'calidad del aire': 'ica'
+    }
+    
+    # Mapeo de palabras (números) a índice de Variable
+    number_word_map_vars = {
+        'primera': 1, '1ra': 1, '1': 1,
+        'segunda': 2, '2da': 2, '2': 2,
+        'tercera': 3, '3ra': 3, '3': 3,
+        'cuarta': 4, '4ta': 4, '4': 4,
+        'quinta': 5, '5ta': 5, '5': 5,
+        'sexta': 6, '6ta': 6, '6': 6,
+        'séptima': 7, 'septima': 7, '7ma': 7, '7': 7,
+        'octava': 8, '8va': 8, '8': 8
     }
 
     # Mapeo de variables amigables para el Chatbot
@@ -834,6 +885,8 @@ elif menu == "Chatbot":
     
     # -----------------------------------------------------
 
+    st.title("Asistente Virtual EcoStats 🤖")
+    
     # Inicializar el estado del chat
     if "chat_stage" not in st.session_state:
         st.session_state.chat_stage = "inicio"
@@ -859,10 +912,31 @@ elif menu == "Chatbot":
     # ESTADO INICIAL: Mostrar opciones principales
     if st.session_state.chat_stage == "inicio":
         st.write("---") # Separador visual
-        cols = st.columns(3)
-        cols[0].button("Entender las Variables 📚", on_click=handle_option, args=["variables"], use_container_width=True)
-        cols[1].button("Info de Estaciones 📡", on_click=handle_option, args=["estaciones"], use_container_width=True)
-        cols[2].button("Fuente de Datos (RACiMo) 🔗", on_click=handle_option, args=["racimo"], use_container_width=True)
+        cols = st.columns(4) # <-- ¡Añadida una cuarta columna!
+        cols[0].button("¿Cómo navegar? 🧭", on_click=handle_option, args=["navegacion"], use_container_width=True)
+        cols[1].button("Entender las Variables 📚", on_click=handle_option, args=["variables"], use_container_width=True)
+        cols[2].button("Info de Estaciones 📡", on_click=handle_option, args=["estaciones"], use_container_width=True)
+        cols[3].button("Fuente de Datos (RACiMo) 🔗", on_click=handle_option, args=["racimo"], use_container_width=True)
+
+    # --- ¡NUEVO ESTADO DE NAVEGACIÓN! ---
+    elif st.session_state.chat_stage == "navegacion":
+        with st.chat_message("assistant"):
+            response_nav = (
+                "¡Claro! Aquí tienes una guía rápida de la aplicación:\n\n"
+                "Puedes ver el menú principal en la **barra lateral izquierda** (si estás en un computador) o tocando el ícono **>** (si estás en un celular).\n\n"
+                "- **Inicio:** Es la portada con la bienvenida y la descripción de las variables.\n"
+                "- **Mapa de Estaciones:** Muestra la ubicación geográfica de todos los sensores RACiMo en un mapa interactivo con un índice numérico.\n"
+                "- **Análisis por Estación:** ¡La sección más importante! Aquí puedes:\n"
+                "    1.  Seleccionar una variable (PM2.5, Temperatura, etc.).\n"
+                "    2.  Elegir una estación específica.\n"
+                "    3.  Filtrar por mes.\n"
+                "    ...y ver el gráfico detallado con sus estadísticas (Máx, Mín, Media).\n"
+                "- **Chatbot:** ¡Soy yo! Estoy aquí para ayudarte.\n"
+                "- **Equipo:** Conoce a los creadores de este dashboard."
+            )
+            st.markdown(response_nav)
+            st.session_state.messages.append({"role": "assistant", "content": response_nav})
+        st.button("← Volver al menú", on_click=handle_option, args=["inicio"])
 
     # ESTADO 1: El usuario quiere entender las variables
     elif st.session_state.chat_stage == "variables":
@@ -875,6 +949,7 @@ elif menu == "Chatbot":
         
         for i, key in enumerate(var_keys):
             label = variable_friendly_map.get(key, key)
+            # Usamos la clave (ej. 'pm2_5') como argumento para el estado
             if var_cols[i % 4].button(label, on_click=handle_option, args=[key], use_container_width=True):
                 pass
         
@@ -883,9 +958,9 @@ elif menu == "Chatbot":
     # ESTADO 2: El usuario quiere info de estaciones
     elif st.session_state.chat_stage == "estaciones":
         with st.chat_message("assistant"):
-            st.markdown(f"Actualmente monitoreamos **{station_count} estaciones** de la red RACiMo en Santander.\n\n{numbered_list_str_stations}")
-            st.markdown("---")
-            st.markdown("¿Te gustaría ver un resumen de las estadísticas (Máx/Mín/Media) de todas estas estaciones?")
+            response_est = f"Actualmente monitoreamos **{station_count} estaciones** de la red RACiMo en Santander.\n\n{numbered_list_str_stations}\n\n---\n¿Te gustaría ver un resumen de las estadísticas (Máx/Mín/Media) de todas estas estaciones?"
+            st.markdown(response_est)
+            st.session_state.messages.append({"role": "assistant", "content": response_est})
         
         cols_est = st.columns(3)
         cols_est[0].button("Sí, mostrar estadísticas", on_click=handle_option, args=["stats_si"], use_container_width=True)
@@ -894,15 +969,16 @@ elif menu == "Chatbot":
 
     # ESTADO 3: El usuario quiere el link de RACiMo
     elif st.session_state.chat_stage == "racimo":
+        response_racimo = (
+            "Todos nuestros datos provienen de la **Red Ambiental Ciudadana de Monitoreo (RACiMo)**. "
+            "Son una fuente increíble de información ambiental para Santander.\n\n"
+            "Puedes visitar su sitio oficial aquí:\n"
+            "[https://class.redclara.net/halley/moncora/intro.html](https://class.redclara.net/halley/moncora/intro.html)"
+        )
         with st.chat_message("assistant"):
-            st.markdown(
-                "Todos nuestros datos provienen de la **Red Ambiental Ciudadana de Monitoreo (RACiMo)**. "
-                "Son una fuente increíble de información ambiental para Santander."
-            )
-            st.markdown("Puedes visitar su sitio oficial aquí:\n"
-                        "[https://class.redclara.net/halley/moncora/intro.html](https://class.redclara.net/halley/moncora/intro.html)")
+            st.markdown(response_racimo)
         st.button("← Volver al menú", on_click=handle_option, args=["inicio"])
-        st.session_state.messages.append({"role": "assistant", "content": "Aquí tienes el enlace a RACiMo: https://class.redclara.net/halley/moncora/intro.html"})
+        st.session_state.messages.append({"role": "assistant", "content": response_racimo})
 
     # ESTADO: Mostrar estadísticas de TODAS las estaciones
     elif st.session_state.chat_stage == "stats_si":
@@ -928,6 +1004,8 @@ elif menu == "Chatbot":
                     
                     st.markdown("\n\n".join(stat_output))
                     st.markdown("---")
+            
+            st.session_state.messages.append({"role": "assistant", "content": "*(Se mostró el resumen estadístico)*"})
                     
         st.button("← Volver al menú", on_click=handle_option, args=["inicio"])
 
@@ -935,10 +1013,11 @@ elif menu == "Chatbot":
     else:
         # Revisa si el estado actual (ej. "pm2_5") es una clave de variable
         if st.session_state.chat_stage in VARIABLE_DESCRIPTIONS:
+            response_var = VARIABLE_DESCRIPTIONS[st.session_state.chat_stage]
             with st.chat_message("assistant"):
-                st.markdown(VARIABLE_DESCRIPTIONS[st.session_state.chat_stage])
+                st.markdown(response_var)
             st.button("← Volver a Variables", on_click=handle_option, args=["variables"])
-            st.session_state.messages.append({"role": "assistant", "content": VARIABLE_DESCRIPTIONS[st.session_state.chat_stage]})
+            st.session_state.messages.append({"role": "assistant", "content": response_var})
         
         # Si no, volvemos al inicio (estado por defecto)
         else:
@@ -946,6 +1025,7 @@ elif menu == "Chatbot":
             st.experimental_rerun() # Forzamos recargar para mostrar el menú inicial
 
 
+# -------------------------------------------------
 # SECCIÓN: EQUIPO (centrado y totalmente funcional)
 # -----------------------------------------------
 elif menu == "Equipo":
