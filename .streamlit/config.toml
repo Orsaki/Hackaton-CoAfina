@@ -8,10 +8,10 @@ primaryColor="#FAAF5A"
 backgroundColor="#000000"
 
 # Color de fondo para elementos como la barra lateral
-secondaryBackgroundColor="#D4A028"
+secondaryBackgroundColor="#FAAF5A"
 
 # Color del texto principal
 textColor="#FFFFFF"
 
 # Fuente
-font="sans serif"
+font="Quicksand"
