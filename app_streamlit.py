@@ -186,18 +186,18 @@ if menu == "Inicio":
     with col1:
         st.markdown("""
         <div class="variable-card">
-            <h3 style="color:#FFD700;">🌡️ Temperatura</h3>
+            <h3 style="color:#ffffff;">🌡️ Temperatura</h3>
             <p style="color:#C1D1B4  ;">Indica qué tan caliente o frío está el ambiente. Afecta la salud, la agricultura y los ecosistemas.</p>
             <small style="color:#C1D1B4;">Un aumento sostenido puede indicar olas de calor.</small>
         </div>
 
         <div class="variable-card">
-            <h3 style="color:#FFD700;">💧 Humedad Relativa</h3>
+            <h3 style="color:#ffffff;">💧 Humedad Relativa</h3>
             <p style="color:#C1D1B4  ;">Nos dice cuánta agua hay en el aire. Una alta humedad puede hacer que sintamos más calor.</p>
         </div>
 
         <div class="variable-card">
-            <h3 style="color:#FFD700;">🌧️ Precipitación</h3>
+            <h3 style="color:#ffffff;">🌧️ Precipitación</h3>
             <p style="color:#C1D1B4  ;">Cantidad de lluvia registrada. Es clave para entender sequías, inundaciones y el ciclo del agua.</p>
         </div>
 
@@ -221,14 +221,14 @@ if menu == "Inicio":
     with col2:
         st.markdown("""
         <div class="variable-card">
-            <h3 style="color:#FFD700;">🌫️ PM2.5 (Partículas finas)</h3>
-            <p style="color:#2E8B57  ;">Son pequeñas partículas en el aire que pueden afectar la salud respiratoria.</p>
-            <small style="color:#B0BEC5;">Se miden en microgramos por metro cúbico (µg/m³).</small>
+            <h3 style="color:#ffffff;">🌫️ PM2.5 (Partículas finas)</h3>
+            <p style="color:#C1D1B4  ;">Son pequeñas partículas en el aire que pueden afectar la salud respiratoria.</p>
+            <small style="color:#C1D1B4;">Se miden en microgramos por metro cúbico (µg/m³).</small>
         </div>
 
         <div class="variable-card">
-            <h3 style="color:#FFD700;">🌈 Índice de Calidad del Aire (ICA)</h3>
-            <p style="color:#2E8B57  ;">Nos muestra qué tan limpio o contaminado está el aire mediante una escala de colores:</p>
+            <h3 style="color:#ffffff;">🌈 Índice de Calidad del Aire (ICA)</h3>
+            <p style="color:#C1D1B4  ;">Nos muestra qué tan limpio o contaminado está el aire mediante una escala de colores:</p>
             <p style="color:#FFFFFF;">
             🟢 Buena | 🟡 Moderada | 🟠 Regular | 🔴 Mala
             </p>
