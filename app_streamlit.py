@@ -248,9 +248,7 @@ if menu == "Inicio":
     st.info(
         "Agradecimientos a la Red Ambiental Ciudadana de Monitoreo (RACiMo). [Visita su página aquí](https://class.redclara.net/halley/moncora/intro.html).")
 
-# -----------------------------------------------
-# SECCIÓN: MAPA DE ESTACIONES
-# -----------------------------------------------
+
 # SECCIÓN: MAPA DE ESTACIONES (usando Kepler.gl publicado en GitHub Pages)
 # ----------------------------------------------------------
 elif menu == "Mapa de Estaciones":
@@ -943,7 +941,7 @@ elif menu == "Equipo":
             max-width: 1000px;
         }
         .member-card {
-            background-color: #FFDDCC;
+            background-color: #2E8B57;
             color: #5E0C15;
             border-radius: 20px;
             padding: 25px;
