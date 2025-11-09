@@ -914,29 +914,80 @@ elif menu == "Chatbot":
                 st.markdown(f"🌿 **EcoBot:** {response}")
 
 
-# -----------------------------------------------
-# SECCIÓN: EQUIPO (Tu código)
+# SECCIÓN: EQUIPO (centrado y totalmente funcional)
 # -----------------------------------------------
 elif menu == "Equipo":
-    st.title("Nuestro Equipo")
-    st.markdown("---")
+    st.markdown("""
+    <style>
+        .team-banner {
+            text-align: center;
+            color: #5E0C15;
+            font-size: 36px;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 5px;
+        }
+        .team-subtitle {
+            text-align: center;
+            color: #5E0C15;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        .team-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 40px;
+            margin: 0 auto;
+            max-width: 1000px;
+        }
+        .member-card {
+            background-color: #FFDDCC;
+            color: #5E0C15;
+            border-radius: 20px;
+            padding: 25px;
+            width: 260px;
+            text-align: center;
+            box-shadow: 4px 6px 14px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .member-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 6px 8px 18px rgba(0,0,0,0.3);
+        }
+        .member-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #5E0C15;
+        }
+        .member-link {
+            margin-top: 10px;
+            color: #5E0C15;
+        }
+        .member-link a {
+            text-decoration: none;
+            color: #CC878B;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        .member-link a:hover {
+            color: #5E0C15;
+        }
+        .emoji {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+    </style>
 
-    st.markdown("<h2 style='text-align: center;'>🌎 EcoStats</h2>",
-                unsafe_allow_html=True)
+    <p style="color: #5E0C15; font-size: 28px; text-align: center; line-height: 1.6;"> Somos el grupo detrás de <b>EcoStats</b>, comprometidos con transformar datos ambientales en conocimiento para todos. 🌱</p>
 
-    st.write(
-        """
-        Somos el equipo detrás de este proyecto, dedicados a hacer los datos ambientales 
-        accesibles y comprensibles para todos.
-        """
-    )
-    st.markdown("---")
-    st.subheader("Integrantes:")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("#### Daniel Kenyi Ormeño Sakihama")
-        st.markdown("#### Brisa Paredes")
-    with col2:
-        st.markdown("#### Pamela Lazaro")
-        st.markdown("#### Fatima Montes Yato")
+    <div class="team-container">
+        <div class="member-card"><div class="emoji">🧑‍💻</div><div class="member-name">Daniel Ormeño Sakihama</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/Orsaki" target="_blank">aquí</a></div><div>💻</div></div>
+        <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Brisa Paredes</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/BrisaParedes" target="_blank">aquí</a></div><div>💻</div></div>
+        <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Pamela Lázaro</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/lazaropamela" target="_blank">aquí</a></div><div>💻</div></div>
+        <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Fátima Montes Yato</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/FatimaMY" target="_blank">aquí</a></div><div>💻</div></div>
+    </div>
+    """, unsafe_allow_html=True)
