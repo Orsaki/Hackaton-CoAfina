@@ -1053,7 +1053,7 @@ elif menu == "Equipo":
     <style>
         .team-banner {
             text-align: center;
-            color: #5E0C15;
+            color: #2E8B57;
             font-size: 36px;
             font-weight: bold;
             margin-top: 20px;
@@ -1061,7 +1061,7 @@ elif menu == "Equipo":
         }
         .team-subtitle {
             text-align: center;
-            color: #5E0C15;
+            color: #2E8B57;
             font-size: 16px;
             margin-bottom: 30px;
         }
@@ -1075,7 +1075,7 @@ elif menu == "Equipo":
             max-width: 1000px;
         }
         .member-card {
-            background-color: #FFDDCC;
+            background-color: #DDE6D5;
             color: #5E0C15;
             border-radius: 20px;
             padding: 25px;
@@ -1092,20 +1092,20 @@ elif menu == "Equipo":
             font-size: 20px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: #5E0C15;
+            color: #2E8B57;
         }
         .member-link {
             margin-top: 10px;
-            color: #5E0C15;
+            color: #2E8B57;
         }
         .member-link a {
             text-decoration: none;
-            color: #CC878B;
+            color: #87CC9C;
             font-weight: bold;
             transition: color 0.3s ease;
         }
         .member-link a:hover {
-            color: #5E0C15;
+            color: #2E8B57;
         }
         .emoji {
             font-size: 22px;
@@ -1113,7 +1113,7 @@ elif menu == "Equipo":
         }
     </style>
 
-    <p style="color: #5E0C15; font-size: 28px; text-align: center; line-height: 1.6;"> Somos el grupo detrás de <b>EcoStats</b>, comprometidos con transformar datos ambientales en conocimiento para todos. 🌱</p>
+    <p style="color: #2E8B57; font-size: 28px; text-align: center; line-height: 1.6;"> Somos el grupo detrás de <b>EcoStats</b>, comprometidos con transformar datos ambientales en conocimiento para todos. 🌱</p>
 
 
     <div class="team-container">
@@ -1123,3 +1123,4 @@ elif menu == "Equipo":
         <div class="member-card"><div class="emoji">👩‍💻</div><div class="member-name">Fátima Montes</div><div class="member-link">Mi GitHub lo puedes conocer <a href="https://github.com/FatimaMY" target="_blank">aquí</a></div><div>💻</div></div>
     </div>
     """, unsafe_allow_html=True)
+
