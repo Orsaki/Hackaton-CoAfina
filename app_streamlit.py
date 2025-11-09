@@ -710,14 +710,14 @@ elif menu == "Análisis por Estación":
         st.warning(
             "No se pudieron cargar los datos. Verifica que 'datos_limpios.csv' esté en el mismo directorio.")
 
-
 # -----------------------------------------------
-# SECCIÓN: CHATBOT (¡CON LÓGICA DE BOTONES Y GUÍA ACTUALIZADA!)
+# SECCIÓN: CHATBOT (¡CON LÓGICA DE BOTONES Y GUÍA DE GRÁFICOS!)
 # -----------------------------------------------
 elif menu == "Chatbot":
     st.title("Asistente Virtual EcoStats 🤖")
     
     # --- DATOS DE ESTADÍSTICAS GLOBALES PARA EL CHATBOT ---
+    # (Asegúrate de que este diccionario esté definido en la parte superior de tu script)
     STATION_STATS_DATA = {
         "Barranca-RacimoOrquidea": {
             "latitud": 7.068842, "longitud": -73.85138,
@@ -892,6 +892,60 @@ elif menu == "Chatbot":
         "ica": "**ICA (Índice de Calidad del Aire)**: Es un indicador que te dice qué tan limpio está el aire. El gráfico en 'Análisis por Estación' muestra bandas de colores (🟢, 🟡, 🟠, 🔴) para que veas el nivel de riesgo."
     }
     
+    # --- ¡NUEVO! Guía de Gráficos ---
+    CHART_DESCRIPTIONS = {
+        "grafico_linea": {
+            "title": "📈 Gráfico de Línea (Series de Tiempo)",
+            "description": (
+                "Este gráfico (usado para PM2.5, Temperatura, Viento y Presión) es perfecto para ver **tendencias**.\n\n"
+                "- **Eje X (Horizontal):** Muestra el tiempo (Días y Horas).\n"
+                "- **Eje Y (Vertical):** Muestra el valor de la variable.\n\n"
+                "**¿Cómo leerlo?** Simplemente sigue la línea. Si sube, el valor aumenta; si baja, disminuye. Es ideal para ver picos (valores máximos) y valles (valores mínimos) durante el mes."
+            )
+        },
+        "grafico_area": {
+            "title": "💧 Gráfico de Área (Precipitación)",
+            "description": (
+                "Este gráfico se usa para la **Precipitación (lluvia)**.\n\n"
+                "- **Eje X (Horizontal):** Muestra el tiempo.\n"
+                "- **Eje Y (Vertical):** Muestra cuántos milímetros (mm) de lluvia cayeron en ese registro (usualmente 15 min).\n\n"
+                "**¿Cómo leerlo?** Los picos altos significan lluvias fuertes. Las métricas sobre el gráfico son clave: 'Total Acumulada' te dice cuánta lluvia cayó en todo el mes."
+            )
+        },
+        "mapa_calor": {
+            "title": "🌡️ Mapa de Calor (Humedad)",
+            "description": (
+                "Este gráfico es excelente para encontrar **patrones diarios**.\n\n"
+                "- **Eje X (Horizontal):** Muestra los días del mes.\n"
+                "- **Eje Y (Vertical):** Muestra las 24 horas del día.\n"
+                "- **Color:** La intensidad del color (más oscuro o más claro) muestra el valor de la humedad.\n\n"
+                "**¿Cómo leerlo?** Busca bandas de color horizontales. Por ejemplo, si la franja de las '4:00' (4 AM) es siempre azul oscura, significa que la madrugada es consistentemente el momento más húmedo del día."
+            )
+        },
+        "rosa_vientos": {
+            "title": "🧭 Rosa de Vientos (Dirección del Viento)",
+            "description": (
+                "Este es un gráfico polar especial para entender el viento.\n\n"
+                "- **Direcciones (N, S, E, O):** Muestra *de dónde* viene el viento (Ej. 'N' significa viento del norte).\n"
+                "- **Longitud de las Barras:** Cuanto más larga es la barra en una dirección, más *frecuentemente* sopló el viento desde allí.\n"
+                "- **Colores:** Los colores en cada barra indican qué tan *fuerte* (rápido) sopló el viento en esa dirección.\n\n"
+                "**¿Cómo leerlo?** La dirección con la barra más larga es la dirección del viento predominante."
+            )
+        },
+        "bandas_ica": {
+            "title": "🟢 Gráfico de Bandas (ICA)",
+            "description": (
+                "Este gráfico (usado para el Índice de Calidad del Aire) te ayuda a entender el **nivel de riesgo** de un solo vistazo.\n\n"
+                "- **Línea:** Muestra el valor promedio diario del ICA.\n"
+                "- **Bandas de Colores:** Muestran los rangos de calidad del aire:\n"
+                "  - 🟢 **Bueno (0-50):** Calidad del aire satisfactoria.\n"
+                "  - 🟡 **Moderado (51-100):** Aceptable.\n"
+                "  - 🟠 **Desfavorable (101-150):** Nocivo para grupos sensibles.\n"
+                "  - 🔴 **Dañino (151+):** Nocivo para la salud."
+            )
+        }
+    }
+    
     # Mapa de Índice de Variables (Número -> Clave)
     VARIABLE_INDEX_MAP = {
         1: "pm2_5",
@@ -965,13 +1019,14 @@ elif menu == "Chatbot":
     # ESTADO INICIAL: Mostrar opciones principales
     if st.session_state.chat_stage == "inicio":
         st.write("---") # Separador visual
-        cols = st.columns(4) 
+        cols = st.columns(5) # <-- ¡Añadida una quinta columna!
         cols[0].button("¿Cómo navegar? 🧭", on_click=handle_option, args=["navegacion"], use_container_width=True)
-        cols[1].button("Entender las Variables 📚", on_click=handle_option, args=["variables"], use_container_width=True)
-        cols[2].button("Info de Estaciones 📡", on_click=handle_option, args=["estaciones"], use_container_width=True)
-        cols[3].button("Fuente de Datos (RACiMo) 🔗", on_click=handle_option, args=["racimo"], use_container_width=True)
+        cols[1].button("Entender Gráficos 📈", on_click=handle_option, args=["graficos"], use_container_width=True)
+        cols[2].button("Entender Variables 📚", on_click=handle_option, args=["variables"], use_container_width=True)
+        cols[3].button("Info de Estaciones 📡", on_click=handle_option, args=["estaciones"], use_container_width=True)
+        cols[4].button("Fuente de Datos 🔗", on_click=handle_option, args=["racimo"], use_container_width=True)
 
-    # --- ¡NUEVO ESTADO DE NAVEGACIÓN! ---
+    # --- ESTADO DE NAVEGACIÓN ---
     elif st.session_state.chat_stage == "navegacion":
         with st.chat_message("assistant"):
             response_nav = (
@@ -991,18 +1046,30 @@ elif menu == "Chatbot":
             st.session_state.messages.append({"role": "assistant", "content": response_nav})
         st.button("← Volver al menú", on_click=handle_option, args=["inicio"])
 
+    # --- ¡NUEVO! ESTADO DE GUÍA DE GRÁFICOS ---
+    elif st.session_state.chat_stage == "graficos":
+        with st.chat_message("assistant"):
+            st.markdown("¡Perfecto! Estos son los tipos de gráficos que usamos en la sección 'Análisis por Estación'. Haz clic en uno para saber cómo leerlo:")
+        
+        g_cols = st.columns(5)
+        g_cols[0].button("Gráfico de Línea", on_click=handle_option, args=["grafico_linea"], use_container_width=True)
+        g_cols[1].button("Gráfico de Área", on_click=handle_option, args=["grafico_area"], use_container_width=True)
+        g_cols[2].button("Mapa de Calor", on_click=handle_option, args=["mapa_calor"], use_container_width=True)
+        g_cols[3].button("Rosa de Vientos", on_click=handle_option, args=["rosa_vientos"], use_container_width=True)
+        g_cols[4].button("Bandas ICA", on_click=handle_option, args=["bandas_ica"], use_container_width=True)
+        
+        st.button("← Volver al menú", on_click=handle_option, args=["inicio"])
+
     # ESTADO 1: El usuario quiere entender las variables
     elif st.session_state.chat_stage == "variables":
         with st.chat_message("assistant"):
             st.markdown(f"¡Genial! Estas son las {len(VARIABLE_INDEX_MAP)} variables que analizamos. Haz clic en una para saber qué significa:")
         
-        # Crear botones para cada variable
         var_cols = st.columns(4)
         var_keys = list(VARIABLE_INDEX_MAP.values())
         
         for i, key in enumerate(var_keys):
             label = variable_friendly_map.get(key, key)
-            # Usamos la clave (ej. 'pm2_5') como argumento para el estado
             if var_cols[i % 4].button(label, on_click=handle_option, args=[key], use_container_width=True):
                 pass
         
@@ -1038,7 +1105,6 @@ elif menu == "Chatbot":
         with st.chat_message("assistant"):
             st.markdown("Aquí tienes el resumen estadístico (Máx/Mín/Media) de todo el periodo para cada estación:")
             
-            # Usamos un expander para no saturar el chat
             with st.expander("Ver Resumen Estadístico Completo", expanded=True):
                 for station_name, data in STATION_STATS_DATA.items():
                     st.markdown(f"#### 📍 {station_name}")
@@ -1063,19 +1129,27 @@ elif menu == "Chatbot":
         st.button("← Volver al menú", on_click=handle_option, args=["inicio"])
 
     # ESTADOS DINÁMICOS: Mostrar definición de variable
-    else:
-        # Revisa si el estado actual (ej. "pm2_5") es una clave de variable
-        if st.session_state.chat_stage in VARIABLE_DESCRIPTIONS:
-            response_var = VARIABLE_DESCRIPTIONS[st.session_state.chat_stage]
-            with st.chat_message("assistant"):
-                st.markdown(response_var)
-            st.button("← Volver a Variables", on_click=handle_option, args=["variables"])
-            st.session_state.messages.append({"role": "assistant", "content": response_var})
+    elif st.session_state.chat_stage in VARIABLE_DESCRIPTIONS:
+        response_var = VARIABLE_DESCRIPTIONS[st.session_state.chat_stage]
+        with st.chat_message("assistant"):
+            st.markdown(response_var)
+        st.button("← Volver a Variables", on_click=handle_option, args=["variables"])
+        st.session_state.messages.append({"role": "assistant", "content": response_var})
         
-        # Si no, volvemos al inicio (estado por defecto)
-        else:
-            st.session_state.chat_stage = "inicio"
-            st.experimental_rerun() # Forzamos recargar para mostrar el menú inicial
+    # --- ¡NUEVO! ESTADOS DINÁMICOS: Mostrar definición de tipo de gráfico ---
+    elif st.session_state.chat_stage in CHART_DESCRIPTIONS:
+        chart_data = CHART_DESCRIPTIONS[st.session_state.chat_stage]
+        with st.chat_message("assistant"):
+            st.markdown(f"### {chart_data['title']}")
+            st.markdown(chart_data['description'])
+        st.button("← Volver a Gráficos", on_click=handle_option, args=["graficos"])
+        st.session_state.messages.append({"role": "assistant", "content": chart_data['description']})
+    
+    # Si no, volvemos al inicio (estado por defecto)
+    else:
+        st.session_state.chat_stage = "inicio"
+        st.experimental_rerun() # Forzamos recargar para mostrar el menú inicial
+
 
 # -------------------------------------------------
 # SECCIÓN: EQUIPO (centrado y totalmente funcional)
