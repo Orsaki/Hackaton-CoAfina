@@ -6,13 +6,13 @@
 primaryColor="#00A0FF"
 
 # Color de fondo principal - Un azul muy oscuro (casi negro)
-backgroundColor="#0A1828"
+backgroundColor="#EDCC9A"
 
 # Color de fondo para elementos como la barra lateral y selectores
-secondaryBackgroundColor="#172C41"
+secondaryBackgroundColor="#C2924F"
 
 # Color del texto principal (sobre el fondo oscuro)
-textColor="#FFFFFF"
+textColor="#402F20"
 
 # Color de las fuentes (ej. Garamond, serif)
-font="sans serif"
+font="Quicksand"
