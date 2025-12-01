@@ -1,4 +1,4 @@
-# 🌳 EcoStats: Proyecto Hackaton CoAfina
+# 🌳 EcoStats: Proyecto Hackaton CoAfina.
 
 ¡Bienvenido al repositorio del proyecto **EcoStats**! Esta es nuestra contribución para el **Hackaton de CoAfina**, enfocada en el análisis y visualización de datos.
 
